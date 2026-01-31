@@ -3,7 +3,7 @@ import { verifyAccessToken } from "@/lib/db/cli-tokens";
 const AI_GATEWAY_URL = "https://ai-gateway.vercel.sh/v3/ai";
 
 // Allow streaming responses up to 5 minutes
-export const maxDuration = 300;
+// export const maxDuration = 300;
 
 export async function POST(
   req: Request,
@@ -28,10 +28,22 @@ async function handleProxyRequest(
   const endpoint = path.join("/");
   const requestUrl = new URL(req.url);
   const gatewayUrl = `${AI_GATEWAY_URL}/${endpoint}${requestUrl.search}`;
+  const requestId = req.headers.get("x-vercel-id");
+
+  console.error("AI proxy request:", {
+    requestId,
+    method,
+    endpoint,
+    gatewayUrl,
+  });
 
   // Extract and validate Bearer token
   const authHeader = req.headers.get("Authorization");
   if (!authHeader?.startsWith("Bearer ")) {
+    console.error("AI proxy auth header missing or invalid:", {
+      requestId,
+      hasAuthHeader: Boolean(authHeader),
+    });
     return Response.json(
       { error: "Missing or invalid authorization header" },
       { status: 401 },
@@ -41,8 +53,26 @@ async function handleProxyRequest(
   const token = authHeader.slice(7);
 
   // Verify the token
-  const verification = await verifyAccessToken(token);
+  let verification: Awaited<ReturnType<typeof verifyAccessToken>>;
+  try {
+    verification = await verifyAccessToken(token);
+  } catch (error) {
+    console.error("AI proxy token verification threw:", {
+      requestId,
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+    });
+    return Response.json(
+      { error: "Token verification failed" },
+      { status: 500 },
+    );
+  }
+
   if (!verification.valid) {
+    console.error("AI proxy token verification failed:", {
+      requestId,
+      error: verification.error,
+    });
     return Response.json(
       { error: verification.error || "Invalid token" },
       { status: 401 },
@@ -74,11 +104,19 @@ async function handleProxyRequest(
 
   const gatewayToken = process.env.VERCEL_OIDC_TOKEN;
   if (!gatewayToken) {
+    console.error("AI proxy missing VERCEL_OIDC_TOKEN:", {
+      requestId,
+      hasGatewayToken: false,
+    });
     return Response.json(
       { error: "Missing VERCEL_OIDC_TOKEN configuration" },
       { status: 500 },
     );
   }
+  console.error("AI proxy using gateway token:", {
+    requestId,
+    hasGatewayToken: true,
+  });
 
   // Add the real gateway auth (OIDC token for Vercel AI Gateway)
   forwardHeaders.set("Authorization", `Bearer ${gatewayToken}`);
@@ -96,6 +134,7 @@ async function handleProxyRequest(
       if (!response.ok) {
         const responseText = await response.text();
         console.error("AI gateway GET failed:", {
+          requestId,
           status: response.status,
           statusText: response.statusText,
           body: responseText,
@@ -126,6 +165,7 @@ async function handleProxyRequest(
     if (!response.ok) {
       const responseText = await response.text();
       console.error("AI gateway POST failed:", {
+        requestId,
         status: response.status,
         statusText: response.statusText,
         body: responseText,
@@ -151,6 +191,7 @@ async function handleProxyRequest(
     ) {
       return new Response(null, { status: 499 });
     }
+    console.error("AI proxy request failed:", error);
     throw error;
   }
 }
