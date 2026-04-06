@@ -9,6 +9,7 @@ import {
   ArrowUpDown,
   Loader2,
   RefreshCw,
+  Sparkles,
   X,
 } from "lucide-react";
 import type {
@@ -169,8 +170,14 @@ function CheckStateIcon({
 /*  Single check row                                                   */
 /* ------------------------------------------------------------------ */
 
-function CheckRunRow({ checkRun }: { checkRun: PullRequestCheckRun }) {
-  const inner = (
+function CheckRunRow({
+  checkRun,
+  onFix,
+}: {
+  checkRun: PullRequestCheckRun;
+  onFix?: (checkName: string) => void;
+}) {
+  const nameEl = (
     <div className="flex min-w-0 items-center gap-2 py-0.5">
       <CheckStateIcon state={checkRun.state} />
       <span
@@ -185,22 +192,39 @@ function CheckRunRow({ checkRun }: { checkRun: PullRequestCheckRun }) {
     </div>
   );
 
-  if (checkRun.detailsUrl) {
-    return (
-      /* oxlint-disable-next-line nextjs/no-html-link-for-pages */
-      <a
-        href={checkRun.detailsUrl}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="group/check block"
-        aria-label={`Open details for ${checkRun.name}`}
-      >
-        {inner}
-      </a>
-    );
-  }
+  const showFix = checkRun.state === "failed" && onFix;
 
-  return inner;
+  return (
+    <div className="flex items-center gap-1">
+      <div className="min-w-0 flex-1">
+        {checkRun.detailsUrl ? (
+          /* oxlint-disable-next-line nextjs/no-html-link-for-pages */
+          <a
+            href={checkRun.detailsUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group/check block"
+            aria-label={`Open details for ${checkRun.name}`}
+          >
+            {nameEl}
+          </a>
+        ) : (
+          nameEl
+        )}
+      </div>
+      {showFix && (
+        <button
+          type="button"
+          onClick={() => onFix(checkRun.name)}
+          className="flex shrink-0 items-center gap-1 rounded px-1.5 py-0.5 text-xs text-muted-foreground hover:bg-muted hover:text-foreground"
+          aria-label={`Fix ${checkRun.name}`}
+        >
+          <Sparkles className="h-3 w-3" />
+          Fix
+        </button>
+      )}
+    </div>
+  );
 }
 
 /* ------------------------------------------------------------------ */
@@ -211,10 +235,12 @@ function GroupSection({
   state,
   checkRuns,
   defaultOpen,
+  onFixCheck,
 }: {
   state: PullRequestCheckState;
   checkRuns: PullRequestCheckRun[];
   defaultOpen: boolean;
+  onFixCheck?: (checkName: string) => void;
 }) {
   const [open, setOpen] = useState(defaultOpen);
 
@@ -236,7 +262,7 @@ function GroupSection({
         <ul className="ml-4 space-y-0.5">
           {checkRuns.map((cr, i) => (
             <li key={`${cr.name}-${cr.detailsUrl ?? "no-url"}-${i}`}>
-              <CheckRunRow checkRun={cr} />
+              <CheckRunRow checkRun={cr} onFix={onFixCheck} />
             </li>
           ))}
         </ul>
@@ -261,6 +287,8 @@ interface CheckRunsListProps {
   isRefreshing?: boolean;
   /** True on initial load before any data arrives */
   isLoading?: boolean;
+  /** Called when the user clicks "Fix" on a failing check */
+  onFixCheck?: (checkName: string) => void;
 }
 
 export function CheckRunsList({
@@ -269,6 +297,7 @@ export function CheckRunsList({
   onRefresh,
   isRefreshing,
   isLoading,
+  onFixCheck,
 }: CheckRunsListProps) {
   const passed =
     checks?.passed ?? checkRuns.filter((c) => c.state === "passed").length;
@@ -424,6 +453,7 @@ export function CheckRunsList({
                       state={state}
                       checkRuns={runs}
                       defaultOpen
+                      onFixCheck={onFixCheck}
                     />
                   );
                 })}
@@ -432,7 +462,7 @@ export function CheckRunsList({
               <ul className="space-y-0.5">
                 {sorted.map((cr, i) => (
                   <li key={`${cr.name}-${cr.detailsUrl ?? "no-url"}-${i}`}>
-                    <CheckRunRow checkRun={cr} />
+                    <CheckRunRow checkRun={cr} onFix={onFixCheck} />
                   </li>
                 ))}
               </ul>

@@ -3843,6 +3843,12 @@ export function SessionChatContent({
           onMerged={handleMerged}
           onViewDiff={() => setShowDiffPanel(true)}
           canViewDiff={supportsDiff && Boolean(diff || session.cachedDiff)}
+          onFixCheck={(checkName) => {
+            setMergeDialogOpen(false);
+            void sendMessageWithPendingState({
+              text: `# Fix Failing Check: ${checkName}\n\nThe "${checkName}" check is failing on this pull request. Please investigate the failure, identify the root cause, and push a fix.`,
+            });
+          }}
         />
       )}
 

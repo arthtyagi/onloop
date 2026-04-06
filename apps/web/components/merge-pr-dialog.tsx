@@ -38,6 +38,8 @@ interface MergePrDialogProps {
   onMerged?: (result: MergePullRequestResponse) => Promise<void> | void;
   onViewDiff?: () => void;
   canViewDiff?: boolean;
+  /** Called when the user clicks "Fix" on a failing check */
+  onFixCheck?: (checkName: string) => void;
 }
 
 const mergeMethodLabels: Record<PullRequestMergeMethod, string> = {
@@ -65,6 +67,7 @@ export function MergePrDialog({
   onMerged,
   onViewDiff,
   canViewDiff = false,
+  onFixCheck,
 }: MergePrDialogProps) {
   const [readiness, setReadiness] = useState<MergeReadinessResponse | null>(
     null,
@@ -293,6 +296,7 @@ export function MergePrDialog({
             }}
             isRefreshing={isLoadingReadiness}
             isLoading={isLoadingReadiness && !readiness}
+            onFixCheck={onFixCheck}
           />
 
           <div className="flex items-center justify-between rounded-md border border-border bg-muted/30 p-3">
