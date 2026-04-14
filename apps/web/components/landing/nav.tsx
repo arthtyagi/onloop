@@ -24,17 +24,17 @@ export function LandingNav({
     <nav className="fixed left-0 right-0 top-0 z-50">
       <div className="mx-auto max-w-[1320px]">
         <div
-          className={`flex h-16 items-center justify-between border-x pl-6 pr-4 transition-all duration-200 ${
+          className={`flex h-16 items-center justify-between border-x bg-(--l-bg) pl-6 pr-4 transition-all duration-200 ${
             scrolled
-              ? "border-x-(--l-border) bg-(--l-nav-bg) shadow-[0_1px_0_0_var(--l-border)]"
-              : "border-x-transparent bg-transparent shadow-none"
+              ? "border-x-(--l-border) shadow-[0_1px_0_0_var(--l-border)]"
+              : "shadow-none"
           }`}
         >
           <Logo className="h-[17px]" />
 
           <div
             className={cn(
-              "flex items-center gap-2 transition-all duration-200 [transition-timing-function:cubic-bezier(0.4,0.04,0.04,1)]",
+              "flex items-center gap-2 transition-all duration-150 [transition-timing-function:cubic-bezier(0.4,0.04,0.04,1)]",
               showSignIn
                 ? "opacity-100 blur-none"
                 : "pointer-events-none opacity-0 blur-xs",

@@ -43,7 +43,7 @@ export function SignedOutHero() {
                 Open Agents.
               </h1>
               <p
-                className="mt-4 text-balance text-base leading-relaxed text-(--l-fg-2) sm:mt-6 sm:text-lg"
+                className="mt-4 text-balance text-base leading-relaxed text-(--l-fg-2) sm:mt-6 sm:text-xl"
               >
                 Spawn coding agents that run infinitely in the cloud. Powered by
                 AI SDK, Gateway, Sandbox, and Workflow SDK.
@@ -56,7 +56,7 @@ export function SignedOutHero() {
             </div>
           </div>
 
-          <div className="mx-auto mt-12 max-w-[1320px] px-4 sm:px-6 md:mt-20 md:px-0">
+          <div className="mx-auto mt-12 max-w-[1320px] px-4 sm:px-6 md:mt-20 md:px-0 overflow-hidden">
             <div>
               <Stage tone="slate">
                 <div className="mx-auto w-full max-w-[1160px]">
