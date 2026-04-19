@@ -4,6 +4,11 @@
   "$schema": "./node_modules/oxfmt/configuration_schema.json",
   "ignorePatterns": [
     ".agents/skills/**",
+    ".claude/skills/**",
+    ".factory/skills/**",
+    ".trae/skills/**",
+    ".windsurf/skills/**",
+    ".sisyphus/**",
     "apps/web/components/ui/**",
     "**/*.md",
   ],

@@ -41,3 +41,28 @@ report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
 # open-harness dev server artifacts
 .open-harness-dev-server-state.json
 .open-harness-dev-server-*.pid
+
+# === onloop additions ===
+!.vscode/extensions.json
+!.vscode/launch.json
+!.vscode/settings.json
+!.vscode/tasks.json
+.alchemy
+.nyc_output
+.pnp
+.pnp.js
+.pnpm-debug.log*
+.vscode/*
+*.log
+*.swo
+*.swp
+*~
+apps/web/src/**/*.js
+build
+lerna-debug.log*
+npm-debug.log*
+packages/env/src/**/*.js
+temp
+tmp
+yarn-debug.log*
+yarn-error.log*

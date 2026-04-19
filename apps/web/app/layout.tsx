@@ -46,16 +46,16 @@ const metadataBase =
     ? new URL(`https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`)
     : process.env.VERCEL_URL
       ? new URL(`https://${process.env.VERCEL_URL}`)
-      : new URL("https://open-agents.dev");
+      : new URL("https://onloop.work");
 
 export const metadata: Metadata = {
   metadataBase,
   title: {
-    default: "Open Agents",
-    template: "%s | Open Agents",
+    default: "onloop",
+    template: "%s | onloop",
   },
   description:
-    "Spawn coding agents that run infinitely in the cloud. Powered by AI SDK, Gateway, Sandbox, and Workflow SDK.",
+    "Email podcast ideas. Agents pick, research, voice, and publish real episodes. Built on AI SDK, Gateway, Sandbox, and Workflow SDK.",
   icons: {
     icon: faviconPath,
     shortcut: faviconPath,
