@@ -135,12 +135,20 @@ async function concatStep(
   outro: Buffer,
 ): Promise<{ buffer: Buffer; durationSec: number }> {
   "use step";
-  const buffer = concatMp3(
-    Buffer.from(intro),
-    Buffer.from(voice),
-    Buffer.from(outro),
+  const introBuf = Buffer.from(intro);
+  const voiceBuf = Buffer.from(voice);
+  const outroBuf = Buffer.from(outro);
+  console.error(
+    `[concat] sizes intro=${introBuf.length} voice=${voiceBuf.length} outro=${outroBuf.length} ` +
+      `intro[0..3]=${introBuf.subarray(0, 3).toString("hex")} ` +
+      `voice[0..3]=${voiceBuf.subarray(0, 3).toString("hex")} ` +
+      `outro[0..3]=${outroBuf.subarray(0, 3).toString("hex")}`,
   );
+  const buffer = concatMp3(introBuf, voiceBuf, outroBuf);
   const durationSec = estimateDurationSec(buffer);
+  console.error(
+    `[concat] output size=${buffer.length} first 16=${buffer.subarray(0, 16).toString("hex")}`,
+  );
   return { buffer, durationSec };
 }
 
