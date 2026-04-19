@@ -1,4 +1,4 @@
-import { desc, eq, inArray, isNull, or } from "drizzle-orm";
+import { desc, eq, inArray } from "drizzle-orm";
 import { db } from "./client";
 import {
   episodes,
@@ -118,7 +118,7 @@ export async function listRunSummaries(
 ): Promise<RunSummary[]> {
   const limit = options.limit ?? 50;
   const where = options.sessionId
-    ? or(eq(runs.sessionId, options.sessionId), isNull(runs.sessionId))
+    ? eq(runs.sessionId, options.sessionId)
     : undefined;
 
   const runRows = await (where
