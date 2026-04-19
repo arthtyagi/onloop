@@ -98,7 +98,7 @@ export function CanvasHeader({
             Jobs
           </h1>
         </div>
-        <div className="flex items-center gap-2 text-xs text-neutral-400">
+        <div className="flex flex-wrap items-center gap-2 text-xs text-neutral-400">
           {totals ? (
             <>
               <Stat label="runs" value={totals.runs} />
@@ -106,6 +106,7 @@ export function CanvasHeader({
               <Stat label="episodes" value={totals.episodes} />
             </>
           ) : null}
+          {sessionId ? <SessionBadge sessionId={sessionId} /> : null}
           <a
             href="/feed.xml"
             target="_blank"
@@ -202,5 +203,37 @@ function Stat({ label, value }: { label: string; value: number }): JSX.Element {
       <span className="tabular-nums text-white">{value}</span>
       <span className="ml-1 text-neutral-500">{label}</span>
     </div>
+  );
+}
+
+function SessionBadge({ sessionId }: { sessionId: string }): JSX.Element {
+  const [copied, setCopied] = useState(false);
+  const short = sessionId.slice(0, 8);
+
+  async function copy(): Promise<void> {
+    try {
+      await navigator.clipboard.writeText(sessionId);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1200);
+      toast.success("Session ID copied");
+    } catch {
+      toast.error("Copy failed");
+    }
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={copy}
+      className="inline-flex items-center gap-1.5 rounded-md border border-white/10 bg-white/5 px-2 py-1 font-mono text-[11px] text-neutral-300 hover:bg-white/10"
+      title={`Session: ${sessionId}`}
+    >
+      {copied ? (
+        <Check className="size-3 text-emerald-400" />
+      ) : (
+        <Copy className="size-3" />
+      )}
+      {short}…
+    </button>
   );
 }
