@@ -8,18 +8,18 @@ import {
   updateRunStatus,
 } from "@/lib/db/onloop-runs";
 import type { NewEpisode } from "@/lib/db/schema";
+import { concatAudio, estimateDurationSec } from "@/lib/onloop/concat";
 import {
   EPISODE_MP3_PATH_PREFIX,
   INTRO_SFX_PROMPT,
   OUTRO_SFX_PROMPT,
 } from "@/lib/onloop/config";
-import { concatAudio, estimateDurationSec } from "@/lib/onloop/concat";
 import type { PipelineEvent, PipelineStep } from "@/lib/onloop/events";
-import { generateScript } from "@/lib/onloop/script";
 import { researchIdea } from "@/lib/onloop/research";
 import type { MoodTag } from "@/lib/onloop/schemas";
-import { generateSfx } from "@/lib/onloop/sfx";
+import { generateScript } from "@/lib/onloop/script";
 import { sendReplyEmail } from "@/lib/onloop/reply";
+import { generateSfx } from "@/lib/onloop/sfx";
 import { textToSpeech } from "@/lib/onloop/tts";
 import { triageIdeas } from "@/lib/onloop/triage";
 
@@ -39,11 +39,14 @@ function now(): string {
   return new Date().toISOString();
 }
 
-async function emit(
-  writer: WritableStreamDefaultWriter<PipelineEvent>,
-  event: PipelineEvent,
-): Promise<void> {
-  await writer.write(event);
+async function emitEvent(event: PipelineEvent): Promise<void> {
+  "use step";
+  const writer = getWritable<PipelineEvent>().getWriter();
+  try {
+    await writer.write(event);
+  } finally {
+    writer.releaseLock();
+  }
 }
 
 async function updateRunStatusStep(
@@ -173,6 +176,9 @@ async function replyStep(
   fromAddress: string,
 ): Promise<void> {
   "use step";
+  if (originalEmailId.startsWith("web:")) {
+    return;
+  }
   const relations = await getRunWithRelations(runId);
   if (!relations || relations.episodes.length === 0) {
     return;
@@ -185,16 +191,12 @@ async function replyStep(
   });
 }
 
-async function processBranch(
-  runId: string,
-  pick: Pick,
-  writer: WritableStreamDefaultWriter<PipelineEvent>,
-): Promise<void> {
+async function processBranch(runId: string, pick: Pick): Promise<void> {
   async function emitStep(
     step: PipelineStep,
     status: "running" | "completed" | "failed",
   ): Promise<void> {
-    await emit(writer, {
+    await emitEvent({
       type: "branch-step",
       ideaId: pick.ideaId,
       step,
@@ -240,7 +242,7 @@ async function processBranch(
     });
     await emitStep("publish", "completed");
 
-    await emit(writer, {
+    await emitEvent({
       type: "episode-published",
       ideaId: pick.ideaId,
       episodeId: published.episodeId,
@@ -251,7 +253,7 @@ async function processBranch(
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
-    await emit(writer, {
+    await emitEvent({
       type: "run-error",
       message: `Branch ${pick.ideaId}: ${message}`,
       timestamp: now(),
@@ -263,21 +265,18 @@ async function processBranch(
 export async function podcastWorkflow(input: WorkflowInput): Promise<void> {
   "use workflow";
 
-  const writable = getWritable<PipelineEvent>();
-  const writer = writable.getWriter();
-
   try {
     await updateRunStatusStep(input.runId, "running");
-    await emit(writer, {
+    await emitEvent({
       type: "run-status",
       status: "running",
       timestamp: now(),
     });
 
     const ideaPairs = await fetchIdeasStep(input.runId);
-
     const picks = await triageStep(input.runId, ideaPairs, input.k);
-    await emit(writer, {
+
+    await emitEvent({
       type: "triage-complete",
       picks: picks.map((pick) => ({
         id: pick.ideaId,
@@ -287,35 +286,30 @@ export async function podcastWorkflow(input: WorkflowInput): Promise<void> {
       timestamp: now(),
     });
 
-    await Promise.all(
-      picks.map((pick) => processBranch(input.runId, pick, writer)),
-    );
+    await Promise.all(picks.map((pick) => processBranch(input.runId, pick)));
 
     const fromAddress = process.env.ONLOOP_FROM_ADDRESS ?? "hello@onloop.work";
     await replyStep(input.runId, input.originalEmailId, fromAddress);
-    await emit(writer, { type: "reply-sent", timestamp: now() });
+    await emitEvent({ type: "reply-sent", timestamp: now() });
 
     await updateRunStatusStep(input.runId, "completed", new Date());
-    await emit(writer, {
+    await emitEvent({
       type: "run-status",
       status: "completed",
       timestamp: now(),
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
-    await emit(writer, {
+    await emitEvent({
       type: "run-error",
       message,
       timestamp: now(),
     });
     await updateRunStatusStep(input.runId, "failed");
-    await emit(writer, {
+    await emitEvent({
       type: "run-status",
       status: "failed",
       timestamp: now(),
     });
-    throw err;
-  } finally {
-    await writer.close();
   }
 }
