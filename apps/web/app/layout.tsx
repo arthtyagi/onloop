@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, JetBrains_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { Providers } from "./providers";
 import "./globals.css";
@@ -14,27 +14,10 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-const themeInitializationScript = `
-(() => {
-  const storageKey = "open-agents-theme";
-  const darkModeMediaQuery = "(prefers-color-scheme: dark)";
-  const storedTheme = window.localStorage.getItem(storageKey);
-
-  const theme =
-    storedTheme === "light" || storedTheme === "dark" || storedTheme === "system"
-      ? storedTheme
-      : "system";
-
-  const resolvedTheme =
-    theme === "system"
-      ? window.matchMedia(darkModeMediaQuery).matches
-        ? "dark"
-        : "light"
-      : theme;
-
-  document.documentElement.classList.toggle("dark", resolvedTheme === "dark");
-})();
-`;
+const jetbrainsMono = JetBrains_Mono({
+  variable: "--font-jetbrains-mono",
+  subsets: ["latin"],
+});
 
 const isPreviewDeployment = process.env.VERCEL_ENV === "preview";
 const faviconPath = isPreviewDeployment
@@ -71,13 +54,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" className="dark">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} font-sans overflow-x-hidden antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${jetbrainsMono.variable} font-sans overflow-x-hidden antialiased`}
       >
-        <script
-          dangerouslySetInnerHTML={{ __html: themeInitializationScript }}
-        />
         <Providers>{children}</Providers>
         <Analytics />
       </body>

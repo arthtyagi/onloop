@@ -1,17 +1,22 @@
-import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
-import { SESSION_COOKIE_NAME } from "@/lib/session/constants";
-import { getServerSession } from "@/lib/session/get-server-session";
-import { HomePage } from "./home-page";
+import type { Metadata } from "next";
+import { CanvasHeader } from "@/components/onloop/canvas-header";
+import { JobsCanvas } from "@/components/onloop/jobs-canvas";
+import { INBOUND_EMAIL } from "@/lib/onloop/config";
 
-export default async function Home() {
-  const session = await getServerSession();
-  if (session?.user) {
-    redirect("/sessions");
-  }
+export const metadata: Metadata = {
+  title: "onloop",
+  description: "AI multimedia pipeline — podcast episodes from email.",
+};
 
-  const store = await cookies();
-  const hasSessionCookie = Boolean(store.get(SESSION_COOKIE_NAME)?.value);
+export const dynamic = "force-dynamic";
 
-  return <HomePage hasSessionCookie={hasSessionCookie} lastRepo={null} />;
+export default function Home(): React.ReactElement {
+  return (
+    <main className="flex min-h-screen flex-col gap-6 bg-black px-6 py-6 text-white">
+      <CanvasHeader inboundEmail={INBOUND_EMAIL} totals={null} />
+      <section className="h-[calc(100vh-260px)] min-h-[480px]">
+        <JobsCanvas />
+      </section>
+    </main>
+  );
 }
