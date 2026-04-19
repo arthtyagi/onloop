@@ -1,0 +1,41 @@
+apps/web/lib/onloop/use-session-id.ts
+  0317e584a7eb0d78 3,13-18,20-33
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.0",
+  "base_commit_sha": "bd6bcfb6f14043bce8ff1e43e601fdefc1692a0c",
+  "prompts": {
+    "0317e584a7eb0d78": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "opencode-transcript-ses_25bb93693ffexadLPq0XIXXz8T-e5354299-25c2-49fd-a435-a7342349e69c",
+        "model": "unknown"
+      },
+      "human_author": "Arth Tyagi",
+      "messages": [],
+      "total_additions": 21,
+      "total_deletions": 19,
+      "accepted_lines": 21,
+      "overriden_lines": 0
+    },
+    "9bc21f698a58688a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e81bbfba-9039-4eac-8b95-3138cd0b7f3d",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "Arth Tyagi",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 157,
+      "overriden_lines": 0
+    }
+  },
+  "humans": {
+    "h_c21c29def9da85": {
+      "author": "Arth Tyagi"
+    }
+  }
+}
