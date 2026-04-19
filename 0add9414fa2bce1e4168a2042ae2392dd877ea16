@@ -1,0 +1,96 @@
+apps/web/app/layout.tsx
+  3c64daa0e1e9f024 49,54-55,58
+.oxlintrc.json
+  9684917af538c44b 3-11
+README.md
+  f619ee37a6306115 1,3-15
+apps/web/components/auth/signed-out-hero.tsx
+  ea5ff4f847005752 31,35,38-39
+.oxfmtrc.jsonc
+  02316b80f2aac4d6 7-11
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.0",
+  "base_commit_sha": "0add9414fa2bce1e4168a2042ae2392dd877ea16",
+  "prompts": {
+    "02316b80f2aac4d6": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "opencode-transcript-ses_25bb93693ffexadLPq0XIXXz8T-b4e6a11f-2b2a-485a-b83a-e7aca12c8482",
+        "model": "unknown"
+      },
+      "human_author": "Arth Tyagi",
+      "messages": [],
+      "total_additions": 5,
+      "total_deletions": 0,
+      "accepted_lines": 5,
+      "overriden_lines": 0
+    },
+    "3c64daa0e1e9f024": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "opencode-transcript-ses_25bb93693ffexadLPq0XIXXz8T-40a138e2-0bb1-4abe-ab1d-a2655a9452a5",
+        "model": "unknown"
+      },
+      "human_author": "Arth Tyagi",
+      "messages": [],
+      "total_additions": 4,
+      "total_deletions": 4,
+      "accepted_lines": 4,
+      "overriden_lines": 0
+    },
+    "9684917af538c44b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "opencode-transcript-ses_25bb93693ffexadLPq0XIXXz8T-764fd39c-dc5d-4999-acf9-1688b7cfdfbd",
+        "model": "unknown"
+      },
+      "human_author": "Arth Tyagi",
+      "messages": [],
+      "total_additions": 9,
+      "total_deletions": 1,
+      "accepted_lines": 9,
+      "overriden_lines": 0
+    },
+    "ea5ff4f847005752": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "opencode-transcript-ses_25bb93693ffexadLPq0XIXXz8T-53bfa5b7-d98f-40b8-85fa-701744ef48da",
+        "model": "unknown"
+      },
+      "human_author": "Arth Tyagi",
+      "messages": [],
+      "total_additions": 10,
+      "total_deletions": 24,
+      "accepted_lines": 4,
+      "overriden_lines": 0
+    },
+    "ec6da112a3ceb707": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "opencode-transcript-ses_25bb93693ffexadLPq0XIXXz8T-f3866d79-0f33-46ca-b1d7-dfe88b0b3548",
+        "model": "unknown"
+      },
+      "human_author": "Arth Tyagi",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 7,
+      "accepted_lines": 0,
+      "overriden_lines": 0
+    },
+    "f619ee37a6306115": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "opencode-transcript-ses_25bb93693ffexadLPq0XIXXz8T-463ad262-5938-41af-a22f-6642422bfb2f",
+        "model": "unknown"
+      },
+      "human_author": "Arth Tyagi",
+      "messages": [],
+      "total_additions": 14,
+      "total_deletions": 2,
+      "accepted_lines": 14,
+      "overriden_lines": 0
+    }
+  }
+}
