@@ -8,6 +8,7 @@ import {
 import { sha256Hex } from "./hash";
 import { InboundWebhookPayloadSchema, type ParsedEmail } from "./schemas";
 import { maskEmail, stripKTag } from "./sender";
+import { isValidSessionId } from "./session";
 
 export class EmailParseError extends Error {
   readonly code: "no_ideas" | "invalid_payload" | "no_body";
@@ -32,11 +33,27 @@ function stripHtml(html: string): string {
     .replace(/&quot;/g, '"');
 }
 
+const SESSION_TAG_REGEX = /\[session:([A-Za-z0-9_-]{6,64})\]/;
+
+export function extractSessionId(body: string): string | null {
+  const match = SESSION_TAG_REGEX.exec(body);
+  if (!match) {
+    return null;
+  }
+  const candidate = match[1];
+  return isValidSessionId(candidate) ? candidate : null;
+}
+
 export function extractIdeas(body: string): string[] {
   const lines = body
     .split(/\r?\n/)
     .map((line) => line.trim())
-    .filter((line) => line.length >= MIN_IDEA_LENGTH && !line.startsWith(">"))
+    .filter(
+      (line) =>
+        line.length >= MIN_IDEA_LENGTH &&
+        !line.startsWith(">") &&
+        !SESSION_TAG_REGEX.test(line),
+    )
     .slice(0, MAX_IDEAS);
   return lines;
 }
