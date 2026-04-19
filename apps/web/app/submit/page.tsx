@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { SubmitForm } from "@/components/onloop/submit-form";
 
 export const metadata: Metadata = {
@@ -19,6 +20,11 @@ export default function SubmitPage(): React.ReactElement {
         <p className="text-balance text-base leading-relaxed text-muted-foreground">
           Drop a few podcast ideas below. Agents triage, research, write a
           script, voice it with ElevenLabs, and publish to the feed.
+        </p>
+        <p className="text-sm text-muted-foreground">
+          <Link href="/canvas" className="underline hover:text-foreground">
+            View all jobs →
+          </Link>
         </p>
       </header>
       <SubmitForm />

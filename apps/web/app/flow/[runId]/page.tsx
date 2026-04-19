@@ -34,10 +34,10 @@ export default async function FlowPage(
       <header className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <Link
-            href="/submit"
+            href="/canvas"
             className="font-mono text-xs uppercase tracking-wider text-muted-foreground hover:text-foreground"
           >
-            onloop
+            ← onloop
           </Link>
           <span className="text-muted-foreground">·</span>
           <span className="font-mono text-xs uppercase tracking-wider">
