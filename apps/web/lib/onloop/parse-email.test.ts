@@ -90,10 +90,10 @@ describe("parseInboundEmail", () => {
           addresses: [{ address: "user@example.com", name: "User" }],
         },
         to: {
-          text: "tasks@onloop.work",
-          addresses: [{ address: "tasks@onloop.work" }],
+          text: "agent@onloop.work",
+          addresses: [{ address: "agent@onloop.work" }],
         },
-        recipient: "tasks@onloop.work",
+        recipient: "agent@onloop.work",
         subject: overrides.subject ?? "podcast ideas",
         receivedAt: "2026-04-19T00:00:00Z",
         parsedData: {
@@ -102,7 +102,7 @@ describe("parseInboundEmail", () => {
           from: {
             addresses: [{ address: "user@example.com" }],
           },
-          to: { addresses: [{ address: "tasks@onloop.work" }] },
+          to: { addresses: [{ address: "agent@onloop.work" }] },
           textBody:
             "textBody" in overrides
               ? (overrides.textBody ?? null)

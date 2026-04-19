@@ -17,7 +17,7 @@ export const SCRIPT_MAX_WORDS = 500;
 export const MIN_IDEA_LENGTH = 10;
 export const MAX_IDEAS = 10;
 
-export const INBOUND_EMAIL = "tasks@onloop.work" as const;
+export const INBOUND_EMAIL = "agent@onloop.work" as const;
 
 export const PODCAST_TITLE = "onloop";
 export const PODCAST_DESCRIPTION =

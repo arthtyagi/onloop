@@ -168,7 +168,7 @@ export function JobsGrid({
           <p className="text-sm text-neutral-500">
             Drop ideas in the form above, or email{" "}
             <span className="font-mono text-neutral-300">
-              tasks@onloop.work
+              agent@onloop.work
             </span>
             .
           </p>
