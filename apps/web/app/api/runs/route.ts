@@ -4,6 +4,7 @@ import { z } from "zod";
 import { K_DEFAULT, K_MAX, MIN_IDEA_LENGTH } from "@/lib/onloop/config";
 import { createOnloopRun } from "@/lib/onloop/create-run";
 import { generateAnonHandle } from "@/lib/onloop/sender";
+import { readSessionId } from "@/lib/onloop/session";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -28,6 +29,7 @@ export async function POST(request: Request): Promise<Response> {
   const originalEmailId = `web:${nanoid()}`;
   const senderLabel = generateAnonHandle();
   const senderEmail = parsed.email;
+  const sessionId = readSessionId(request.headers);
 
   const result = await createOnloopRun({
     ideas: parsed.ideas,
@@ -38,6 +40,7 @@ export async function POST(request: Request): Promise<Response> {
     senderLabel,
     subject: null,
     notifyEmail: parsed.email,
+    sessionId,
   });
 
   return NextResponse.json(

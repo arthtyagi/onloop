@@ -27,6 +27,9 @@ export type JobCardData = {
   readonly senderLabel: string;
   readonly subject: string | null;
   readonly firstIdeaPreview: string | null;
+  readonly firstEpisodeMp3Url: string | null;
+  readonly firstEpisodeDurationSec: number | null;
+  readonly firstEpisodeTitle: string | null;
   readonly ideaCount: number;
   readonly selectedCount: number;
   readonly episodeCount: number;
@@ -189,21 +192,43 @@ export function JobCard({ data }: CardProps): JSX.Element {
           />
         </div>
       </div>
+      {data.firstEpisodeMp3Url ? (
+        <div className="flex flex-col gap-1.5 border-t border-white/5 px-3 py-2">
+          {data.firstEpisodeTitle ? (
+            <p className="truncate font-mono text-[10px] uppercase tracking-wider text-emerald-300/80">
+              {data.firstEpisodeTitle}
+            </p>
+          ) : null}
+          <audio
+            src={data.firstEpisodeMp3Url}
+            controls
+            preload="none"
+            className="nodrag w-full"
+            onPointerDownCapture={(e) => e.stopPropagation()}
+            onMouseDownCapture={(e) => e.stopPropagation()}
+          >
+            <track kind="captions" />
+          </audio>
+        </div>
+      ) : null}
       <div className="flex items-center justify-between border-t border-white/5 px-3 py-2">
         <Link
           href={`/flow/${data.runId}`}
           className="font-mono text-xs text-neutral-400 hover:text-white"
+          onPointerDownCapture={(e) => e.stopPropagation()}
         >
           open →
         </Link>
-        {data.episodeCount > 0 ? (
-          <Link
-            href={`/flow/${data.runId}`}
+        {data.episodeCount > 0 && data.firstEpisodeMp3Url ? (
+          <a
+            href={data.firstEpisodeMp3Url}
+            download
+            onPointerDownCapture={(e) => e.stopPropagation()}
             className="inline-flex items-center gap-1 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 font-mono text-[11px] text-emerald-200 hover:bg-emerald-500/20"
           >
             <Play className="size-3" />
-            <span>listen</span>
-          </Link>
+            <span>download</span>
+          </a>
         ) : (
           <span className="font-mono text-[11px] text-neutral-600">—</span>
         )}

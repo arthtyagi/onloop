@@ -1,11 +1,13 @@
 "use client";
 
-import { Check, Copy, Mail, Send, Rss } from "lucide-react";
+import { Check, Copy, Mail, Rss, Send } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState, type JSX } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { SESSION_HEADER } from "@/lib/onloop/session";
+import { useSessionId } from "@/lib/onloop/use-session-id";
 
 export type CanvasHeaderProps = {
   inboundEmail: string;
@@ -13,7 +15,7 @@ export type CanvasHeaderProps = {
     runs: number;
     completed: number;
     episodes: number;
-  };
+  } | null;
 };
 
 export function CanvasHeader({
@@ -21,8 +23,10 @@ export function CanvasHeader({
   totals,
 }: CanvasHeaderProps): JSX.Element {
   const router = useRouter();
+  const sessionId = useSessionId();
   const [copied, setCopied] = useState(false);
   const [ideasText, setIdeasText] = useState("");
+  const [email, setEmail] = useState("");
   const [k, setK] = useState(1);
   const [submitting, setSubmitting] = useState(false);
 
@@ -49,12 +53,20 @@ export function CanvasHeader({
       toast.error("Drop at least one idea (10+ chars per line)");
       return;
     }
+    if (!email || !email.includes("@")) {
+      toast.error("Email is required so we can notify you");
+      return;
+    }
     setSubmitting(true);
     try {
+      const headers: HeadersInit = { "Content-Type": "application/json" };
+      if (sessionId) {
+        headers[SESSION_HEADER] = sessionId;
+      }
       const res = await fetch("/api/runs", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ideas, k }),
+        headers,
+        body: JSON.stringify({ ideas, k, email }),
       });
       if (!res.ok) {
         const data = (await res.json().catch(() => ({}))) as {
@@ -87,9 +99,13 @@ export function CanvasHeader({
           </h1>
         </div>
         <div className="flex items-center gap-2 text-xs text-neutral-400">
-          <Stat label="runs" value={totals.runs} />
-          <Stat label="completed" value={totals.completed} />
-          <Stat label="episodes" value={totals.episodes} />
+          {totals ? (
+            <>
+              <Stat label="runs" value={totals.runs} />
+              <Stat label="completed" value={totals.completed} />
+              <Stat label="episodes" value={totals.episodes} />
+            </>
+          ) : null}
           <a
             href="/feed.xml"
             target="_blank"
@@ -125,7 +141,7 @@ export function CanvasHeader({
         </div>
         <form
           onSubmit={handleSubmit}
-          className="flex flex-1 flex-col gap-2 rounded-lg border border-white/10 bg-white/5 p-3"
+          className="flex flex-1 flex-col gap-3 rounded-lg border border-white/10 bg-white/5 p-3"
         >
           <label
             htmlFor="canvas-ideas"
@@ -137,19 +153,27 @@ export function CanvasHeader({
             id="canvas-ideas"
             value={ideasText}
             onChange={(e) => setIdeasText(e.target.value)}
-            rows={2}
+            rows={6}
             placeholder={
-              "The Apple Podcasts search problem\nWhy durable runtimes are the agent substrate"
+              "The Apple Podcasts search problem and what it means for discovery\nWhy durable runtimes are the agent substrate of 2026\nHow AI music licensing wars will unfold over the next decade"
             }
-            className="min-h-[44px] resize-none border-white/10 bg-black/30 font-mono text-xs text-white placeholder:text-neutral-600"
+            className="min-h-[140px] resize-y border-white/10 bg-black/30 font-mono text-sm leading-relaxed text-white placeholder:text-neutral-600"
           />
-          <div className="flex items-center justify-end gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <input
+              type="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="your-email@domain.com · we notify you when ready"
+              className="h-8 flex-1 rounded border border-white/10 bg-black/40 px-2 font-mono text-xs text-white placeholder:text-neutral-600"
+            />
             <label className="flex items-center gap-1.5 font-mono text-[11px] text-neutral-400">
               k
               <select
                 value={k}
                 onChange={(e) => setK(Number.parseInt(e.target.value, 10))}
-                className="h-7 rounded border border-white/10 bg-black/40 px-1.5 text-xs text-white"
+                className="h-8 rounded border border-white/10 bg-black/40 px-1.5 text-xs text-white"
               >
                 <option value={1}>1</option>
                 <option value={2}>2</option>

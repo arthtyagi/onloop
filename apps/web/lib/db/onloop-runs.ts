@@ -103,14 +103,32 @@ export type RunSummary = Run & {
   selectedCount: number;
   episodeCount: number;
   firstIdeaPreview: string | null;
+  firstEpisodeMp3Url: string | null;
+  firstEpisodeDurationSec: number | null;
+  firstEpisodeTitle: string | null;
 };
 
-export async function listRunSummaries(limit = 50): Promise<RunSummary[]> {
-  const runRows = await db
-    .select()
-    .from(runs)
-    .orderBy(desc(runs.createdAt))
-    .limit(limit);
+export type ListRunSummariesOptions = {
+  limit?: number;
+  sessionId?: string | null;
+};
+
+export async function listRunSummaries(
+  options: ListRunSummariesOptions = {},
+): Promise<RunSummary[]> {
+  const limit = options.limit ?? 50;
+  const where = options.sessionId
+    ? eq(runs.sessionId, options.sessionId)
+    : undefined;
+
+  const runRows = await (where
+    ? db
+        .select()
+        .from(runs)
+        .where(where)
+        .orderBy(desc(runs.createdAt))
+        .limit(limit)
+    : db.select().from(runs).orderBy(desc(runs.createdAt)).limit(limit));
   if (runRows.length === 0) {
     return [];
   }
@@ -142,8 +160,21 @@ export async function listRunSummaries(limit = 50): Promise<RunSummary[]> {
     }
   }
   const episodeByRun = new Map<string, number>();
+  const firstEpisodeByRun = new Map<
+    string,
+    { mp3Url: string; durationSec: number; title: string; pubDate: Date }
+  >();
   for (const ep of episodeRows) {
     episodeByRun.set(ep.runId, (episodeByRun.get(ep.runId) ?? 0) + 1);
+    const current = firstEpisodeByRun.get(ep.runId);
+    if (!current || ep.pubDate < current.pubDate) {
+      firstEpisodeByRun.set(ep.runId, {
+        mp3Url: ep.mp3Url,
+        durationSec: ep.durationSec,
+        title: ep.title,
+        pubDate: ep.pubDate,
+      });
+    }
   }
   return runRows.map((r) => ({
     ...r,
@@ -151,6 +182,9 @@ export async function listRunSummaries(limit = 50): Promise<RunSummary[]> {
     selectedCount: ideaByRun.get(r.id)?.selected ?? 0,
     episodeCount: episodeByRun.get(r.id) ?? 0,
     firstIdeaPreview: firstIdeaByRun.get(r.id)?.text ?? null,
+    firstEpisodeMp3Url: firstEpisodeByRun.get(r.id)?.mp3Url ?? null,
+    firstEpisodeDurationSec: firstEpisodeByRun.get(r.id)?.durationSec ?? null,
+    firstEpisodeTitle: firstEpisodeByRun.get(r.id)?.title ?? null,
   }));
 }
 

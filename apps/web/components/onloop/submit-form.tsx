@@ -7,9 +7,12 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { SESSION_HEADER } from "@/lib/onloop/session";
+import { useSessionId } from "@/lib/onloop/use-session-id";
 
 export function SubmitForm(): React.ReactElement {
   const router = useRouter();
+  const sessionId = useSessionId();
   const [ideasText, setIdeasText] = useState("");
   const [email, setEmail] = useState("");
   const [k, setK] = useState(1);
@@ -31,9 +34,13 @@ export function SubmitForm(): React.ReactElement {
     }
     setSubmitting(true);
     try {
+      const headers: HeadersInit = { "Content-Type": "application/json" };
+      if (sessionId) {
+        headers[SESSION_HEADER] = sessionId;
+      }
       const res = await fetch("/api/runs", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers,
         body: JSON.stringify({ ideas, k, email }),
       });
       if (!res.ok) {

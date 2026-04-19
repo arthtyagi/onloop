@@ -7,10 +7,13 @@ import {
   ReactFlowProvider,
   type Edge,
   type Node,
+  type NodeChange,
   type NodeTypes,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-import { useEffect, useMemo, useState, type JSX } from "react";
+import { useCallback, useEffect, useMemo, useState, type JSX } from "react";
+import { SESSION_HEADER } from "@/lib/onloop/session";
+import { useSessionId } from "@/lib/onloop/use-session-id";
 import { JobCard, type JobCardData, type JobStatus } from "./job-card";
 
 export type CanvasJob = {
@@ -23,6 +26,9 @@ export type CanvasJob = {
   senderLabel: string;
   subject: string | null;
   firstIdeaPreview: string | null;
+  firstEpisodeMp3Url: string | null;
+  firstEpisodeDurationSec: number | null;
+  firstEpisodeTitle: string | null;
   ideaCount: number;
   selectedCount: number;
   episodeCount: number;
@@ -31,10 +37,11 @@ export type CanvasJob = {
 type ListResponse = { runs: CanvasJob[] };
 
 const CARD_WIDTH = 320;
-const CARD_HEIGHT = 200;
+const CARD_HEIGHT = 260;
 const GUTTER_X = 40;
 const GUTTER_Y = 40;
 const COLS = 3;
+const POSITIONS_KEY = "onloop-canvas-positions-v1";
 
 type JobNode = Node<JobCardData, "job">;
 
@@ -44,17 +51,55 @@ function sourceKindFromRun(originalEmailId: string): "email" | "web" {
   return originalEmailId.startsWith("web:") ? "web" : "email";
 }
 
-function toNodes(runs: CanvasJob[]): JobNode[] {
-  return runs.map((run, i) => {
-    const col = i % COLS;
-    const row = Math.floor(i / COLS);
+function defaultPositionFor(index: number): { x: number; y: number } {
+  const col = index % COLS;
+  const row = Math.floor(index / COLS);
+  return {
+    x: col * (CARD_WIDTH + GUTTER_X),
+    y: row * (CARD_HEIGHT + GUTTER_Y),
+  };
+}
+
+type PositionMap = Record<string, { x: number; y: number }>;
+
+function loadPositions(): PositionMap {
+  if (typeof window === "undefined") {
+    return {};
+  }
+  try {
+    const raw = window.localStorage.getItem(POSITIONS_KEY);
+    if (!raw) {
+      return {};
+    }
+    const parsed = JSON.parse(raw) as unknown;
+    if (typeof parsed === "object" && parsed !== null) {
+      return parsed as PositionMap;
+    }
+    return {};
+  } catch (err) {
+    void err;
+    return {};
+  }
+}
+
+function savePositions(map: PositionMap): void {
+  if (typeof window === "undefined") {
+    return;
+  }
+  try {
+    window.localStorage.setItem(POSITIONS_KEY, JSON.stringify(map));
+  } catch (err) {
+    void err;
+  }
+}
+
+function buildNodes(runs: CanvasJob[], positions: PositionMap): JobNode[] {
+  return runs.map((run, i): JobNode => {
+    const position = positions[run.id] ?? defaultPositionFor(i);
     return {
       id: run.id,
       type: "job",
-      position: {
-        x: col * (CARD_WIDTH + GUTTER_X),
-        y: row * (CARD_HEIGHT + GUTTER_Y),
-      },
+      position,
       data: {
         runId: run.id,
         status: run.status,
@@ -65,11 +110,14 @@ function toNodes(runs: CanvasJob[]): JobNode[] {
         senderLabel: run.senderLabel,
         subject: run.subject,
         firstIdeaPreview: run.firstIdeaPreview,
+        firstEpisodeMp3Url: run.firstEpisodeMp3Url,
+        firstEpisodeDurationSec: run.firstEpisodeDurationSec,
+        firstEpisodeTitle: run.firstEpisodeTitle,
         ideaCount: run.ideaCount,
         selectedCount: run.selectedCount,
         episodeCount: run.episodeCount,
       },
-      draggable: false,
+      draggable: true,
       selectable: false,
       connectable: false,
     };
@@ -77,50 +125,96 @@ function toNodes(runs: CanvasJob[]): JobNode[] {
 }
 
 export type JobsCanvasProps = {
-  initial: CanvasJob[];
+  initial?: CanvasJob[];
   pollIntervalMs?: number;
 };
 
 export function JobsCanvas({
-  initial,
+  initial = [],
   pollIntervalMs = 2500,
 }: JobsCanvasProps): JSX.Element {
+  const sessionId = useSessionId();
   const [runs, setRuns] = useState<CanvasJob[]>(initial);
+  const [positions, setPositions] = useState<PositionMap>({});
+  const [loaded, setLoaded] = useState(initial.length > 0);
 
   useEffect(() => {
+    setPositions(loadPositions());
+  }, []);
+
+  useEffect(() => {
+    if (!sessionId) {
+      return;
+    }
     let cancelled = false;
 
-    async function tick() {
+    async function tick(): Promise<void> {
       try {
-        const res = await fetch("/api/runs/list", { cache: "no-store" });
+        const res = await fetch("/api/runs/list?limit=80", {
+          cache: "no-store",
+          headers: { [SESSION_HEADER]: sessionId as string },
+        });
         if (!res.ok) {
           return;
         }
         const data = (await res.json()) as ListResponse;
         if (!cancelled) {
           setRuns(data.runs);
+          setLoaded(true);
         }
       } catch (err) {
         void err;
       }
     }
 
+    void tick();
     const id = setInterval(tick, pollIntervalMs);
     return () => {
       cancelled = true;
       clearInterval(id);
     };
-  }, [pollIntervalMs]);
+  }, [sessionId, pollIntervalMs]);
+
+  const onNodesChange = useCallback((changes: NodeChange[]) => {
+    let shouldPersist = false;
+    setPositions((prev) => {
+      const next = { ...prev };
+      for (const change of changes) {
+        if (change.type === "position" && change.position) {
+          next[change.id] = change.position;
+          if (!change.dragging) {
+            shouldPersist = true;
+          }
+        }
+      }
+      if (shouldPersist) {
+        savePositions(next);
+      }
+      return next;
+    });
+  }, []);
 
   const { nodes, edges } = useMemo(() => {
-    return { nodes: toNodes(runs), edges: [] as Edge[] };
-  }, [runs]);
+    return { nodes: buildNodes(runs, positions), edges: [] as Edge[] };
+  }, [runs, positions]);
+
+  if (!loaded) {
+    return (
+      <div className="relative h-full w-full rounded-xl border border-white/5 bg-black/30">
+        <div className="flex h-full items-center justify-center">
+          <p className="font-mono text-xs uppercase tracking-wider text-neutral-500">
+            loading your jobs…
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   if (runs.length === 0) {
     return (
       <div className="relative h-full w-full rounded-xl border border-white/5 bg-black/30">
         <div className="flex h-full items-center justify-center">
-          <div className="flex flex-col items-center gap-2 text-center">
+          <div className="flex flex-col items-center gap-3 text-center">
             <div className="rounded-full border border-white/10 bg-white/5 p-4">
               <svg
                 role="img"
@@ -140,11 +234,11 @@ export function JobsCanvas({
               </svg>
             </div>
             <p className="font-mono text-xs uppercase tracking-wider text-neutral-500">
-              No jobs yet
+              No jobs in this session yet
             </p>
             <p className="max-w-xs text-sm text-neutral-500">
-              Send ideas via email or the header form. Your jobs will appear
-              here as cards.
+              Your jobs live only on this browser. Drop ideas above or email
+              them — cards appear here as they run.
             </p>
           </div>
         </div>
@@ -159,15 +253,17 @@ export function JobsCanvas({
           nodes={nodes}
           edges={edges}
           nodeTypes={nodeTypes}
+          onNodesChange={onNodesChange}
           fitView
           fitViewOptions={{ padding: 0.3, maxZoom: 1 }}
-          nodesDraggable={false}
+          nodesDraggable
           nodesConnectable={false}
           elementsSelectable={false}
-          panOnDrag
+          panOnDrag={[1, 2]}
+          selectionOnDrag={false}
           zoomOnScroll
           minZoom={0.3}
-          maxZoom={1.3}
+          maxZoom={1.5}
           proOptions={{ hideAttribution: true }}
         >
           <Background color="#1f1f1f" gap={24} size={1} />

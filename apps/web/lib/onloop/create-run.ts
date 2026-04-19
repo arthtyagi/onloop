@@ -18,6 +18,7 @@ export type CreateRunInput = {
   senderLabel: string;
   subject: string | null;
   notifyEmail: string | null;
+  sessionId: string | null;
 };
 
 export type CreateRunResult = {
@@ -52,6 +53,7 @@ export async function createOnloopRun(
     senderLabel: input.senderLabel,
     subject: input.subject,
     notifyEmail: input.notifyEmail,
+    sessionId: input.sessionId,
     sourceMessageId: input.sourceMessageId,
     originalEmailId: input.originalEmailId,
   });

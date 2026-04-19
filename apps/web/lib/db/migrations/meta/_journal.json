@@ -225,6 +225,13 @@
       "when": 1776591880581,
       "tag": "0031_concerned_romulus",
       "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "7",
+      "when": 1776592550433,
+      "tag": "0032_powerful_gabe_jones",
+      "breakpoints": true
     }
   ]
 }

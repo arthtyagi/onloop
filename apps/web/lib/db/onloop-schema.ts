@@ -37,6 +37,7 @@ export const runs = pgTable(
     senderLabel: text("sender_label").notNull().default("anon"),
     subject: text("subject"),
     notifyEmail: text("notify_email"),
+    sessionId: text("session_id"),
     sourceMessageId: text("source_message_id").notNull(),
     originalEmailId: text("original_email_id").notNull(),
     langfuseTraceId: text("langfuse_trace_id"),
