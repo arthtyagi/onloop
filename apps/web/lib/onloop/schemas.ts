@@ -100,6 +100,7 @@ export const ParsedEmailSchema = z.object({
   subjectClean: z.string(),
   k: z.number().int().min(1).max(3),
   ideas: z.array(z.string().min(1)).min(1).max(10),
+  sessionId: z.string().nullable(),
 });
 
 export type ParsedEmail = z.infer<typeof ParsedEmailSchema>;
