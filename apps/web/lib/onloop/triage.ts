@@ -38,12 +38,28 @@ export async function triageIdeas(
     ...ideas.map((idea, i) => `${i + 1}. ${idea.text}`),
   ].join("\n");
 
-  const { object } = await generateObject({
-    model: gateway(TRIAGE_MODEL),
-    schema: TriageOutputSchema,
-    system: SYSTEM_PROMPT,
-    prompt: userPrompt,
-  });
+  let object: Awaited<
+    ReturnType<typeof generateObject<typeof TriageOutputSchema>>
+  >["object"];
+  try {
+    const result = await generateObject({
+      model: gateway(TRIAGE_MODEL),
+      schema: TriageOutputSchema,
+      system: SYSTEM_PROMPT,
+      prompt: userPrompt,
+    });
+    object = result.object;
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    const cause =
+      err instanceof Error && err.cause ? String(err.cause) : undefined;
+    console.error(
+      `[triage] generateObject failed: ${message}${
+        cause ? ` | cause=${cause}` : ""
+      } | model=${TRIAGE_MODEL} | k=${k} | ideaCount=${ideas.length}`,
+    );
+    throw err;
+  }
 
   const seen = new Set<number>();
   const byIndex: ScoredIdea[] = [];

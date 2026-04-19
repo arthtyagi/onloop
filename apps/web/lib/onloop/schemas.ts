@@ -54,10 +54,10 @@ const scoredIdeaSchema = z.object({
   index: z.number().int().min(1),
   selected: z.boolean(),
   moodTag: MoodTagSchema,
-  rationale: z.string().min(1).max(400),
-  scoreNovelty: z.number().int().min(1).max(10),
-  scoreListenability: z.number().int().min(1).max(10),
-  scoreFactuality: z.number().int().min(1).max(10),
+  rationale: z.string(),
+  scoreNovelty: z.number().int().min(0).max(10),
+  scoreListenability: z.number().int().min(0).max(10),
+  scoreFactuality: z.number().int().min(0).max(10),
 });
 
 export const TriageOutputSchema = z.object({
