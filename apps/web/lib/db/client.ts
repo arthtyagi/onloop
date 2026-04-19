@@ -12,7 +12,12 @@ export const db = new Proxy({} as DrizzleClient, {
       if (!process.env.POSTGRES_URL) {
         throw new Error("POSTGRES_URL environment variable is required");
       }
-      const client = postgres(process.env.POSTGRES_URL);
+      const client = postgres(process.env.POSTGRES_URL, {
+        prepare: false,
+        max: 1,
+        idle_timeout: 20,
+        connect_timeout: 10,
+      });
       _db = drizzle(client, { schema });
     }
     return Reflect.get(_db, prop);
