@@ -25,9 +25,9 @@ export const PODCAST_CATEGORY = "Technology";
 export const PODCAST_AUTHOR = "onloop";
 export const PODCAST_OWNER_NAME = "onloop";
 
-export const TRIAGE_MODEL = "anthropic/claude-haiku-4.5";
-export const RESEARCH_MODEL = "anthropic/claude-haiku-4.5";
-export const SCRIPT_MODEL = "anthropic/claude-sonnet-4.5";
+export const TRIAGE_MODEL = "openai/gpt-5.4-mini";
+export const RESEARCH_MODEL = "openai/gpt-5.4-mini";
+export const SCRIPT_MODEL = "openai/gpt-5.4-mini";
 
 export const MP3_BITRATE_KBPS = 128;
 export const EPISODE_MP3_PATH_PREFIX = "episodes";

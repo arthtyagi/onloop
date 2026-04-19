@@ -44,9 +44,6 @@ export async function generateScript(
     schema: ScriptOutputSchema,
     system: SYSTEM_PROMPT,
     prompt: userPrompt,
-    providerOptions: {
-      anthropic: { thinking: { type: "disabled", budgetTokens: 0 } },
-    },
   });
 
   const actualCount = object.text.trim().split(/\s+/).filter(Boolean).length;

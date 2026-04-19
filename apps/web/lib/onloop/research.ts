@@ -50,9 +50,6 @@ export async function researchIdea(idea: string): Promise<ResearchOutput> {
     schema: ResearchOutputSchema,
     system: SYSTEM_PROMPT,
     prompt: userPrompt,
-    providerOptions: {
-      anthropic: { thinking: { type: "disabled", budgetTokens: 0 } },
-    },
   });
 
   return object;
