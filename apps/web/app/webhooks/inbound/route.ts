@@ -49,6 +49,9 @@ export async function POST(request: Request): Promise<Response> {
     sourceMessageId: parsed.sourceMessageId,
     originalEmailId: parsed.originalEmailId,
     senderEmail: parsed.senderEmail,
+    senderLabel: parsed.senderLabel,
+    subject: parsed.subjectClean.length > 0 ? parsed.subjectClean : null,
+    notifyEmail: null,
   });
 
   return NextResponse.json(

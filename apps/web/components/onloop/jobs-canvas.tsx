@@ -20,6 +20,9 @@ export type CanvasJob = {
   createdAt: string;
   completedAt: string | null;
   originalEmailId: string;
+  senderLabel: string;
+  subject: string | null;
+  firstIdeaPreview: string | null;
   ideaCount: number;
   selectedCount: number;
   episodeCount: number;
@@ -59,6 +62,9 @@ function toNodes(runs: CanvasJob[]): JobNode[] {
         createdAt: run.createdAt,
         completedAt: run.completedAt,
         sourceKind: sourceKindFromRun(run.originalEmailId),
+        senderLabel: run.senderLabel,
+        subject: run.subject,
+        firstIdeaPreview: run.firstIdeaPreview,
         ideaCount: run.ideaCount,
         selectedCount: run.selectedCount,
         episodeCount: run.episodeCount,

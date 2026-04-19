@@ -34,6 +34,9 @@ export const runs = pgTable(
       .notNull()
       .default("queued"),
     senderHash: text("sender_hash").notNull(),
+    senderLabel: text("sender_label").notNull().default("anon"),
+    subject: text("subject"),
+    notifyEmail: text("notify_email"),
     sourceMessageId: text("source_message_id").notNull(),
     originalEmailId: text("original_email_id").notNull(),
     langfuseTraceId: text("langfuse_trace_id"),

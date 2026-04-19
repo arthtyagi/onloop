@@ -19,6 +19,7 @@ import { researchIdea } from "@/lib/onloop/research";
 import type { MoodTag } from "@/lib/onloop/schemas";
 import { generateScript } from "@/lib/onloop/script";
 import { sendReplyEmail } from "@/lib/onloop/reply";
+import { sendNotificationEmail } from "@/lib/onloop/notify";
 import { generateSfx } from "@/lib/onloop/sfx";
 import { textToSpeech } from "@/lib/onloop/tts";
 import { triageIdeas } from "@/lib/onloop/triage";
@@ -190,18 +191,32 @@ async function replyStep(
   fromAddress: string,
 ): Promise<void> {
   "use step";
-  if (originalEmailId.startsWith("web:")) {
-    return;
-  }
   const relations = await getRunWithRelations(runId);
   if (!relations || relations.episodes.length === 0) {
     return;
   }
+  const runUrl = `https://onloop.work/flow/${runId}`;
+
+  if (originalEmailId.startsWith("web:")) {
+    const notifyEmail = relations.run.notifyEmail;
+    if (!notifyEmail) {
+      return;
+    }
+    await sendNotificationEmail({
+      to: notifyEmail,
+      fromAddress,
+      episodes: relations.episodes,
+      runId,
+      runUrl,
+    });
+    return;
+  }
+
   await sendReplyEmail({
     originalEmailId,
     episodes: relations.episodes,
     fromAddress,
-    runUrl: `https://onloop.work/flow/${runId}`,
+    runUrl,
   });
 }
 

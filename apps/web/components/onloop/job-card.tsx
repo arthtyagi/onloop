@@ -24,6 +24,9 @@ export type JobCardData = {
   readonly createdAt: string;
   readonly completedAt: string | null;
   readonly sourceKind: "email" | "web";
+  readonly senderLabel: string;
+  readonly subject: string | null;
+  readonly firstIdeaPreview: string | null;
   readonly ideaCount: number;
   readonly selectedCount: number;
   readonly episodeCount: number;
@@ -92,12 +95,20 @@ function useTick(intervalMs: number): number {
   return tick;
 }
 
+function truncate(input: string, max: number): string {
+  if (input.length <= max) {
+    return input;
+  }
+  return `${input.slice(0, max - 1).trimEnd()}…`;
+}
+
 export function JobCard({ data }: CardProps): JSX.Element {
   useTick(30_000);
   const style = STATUS_STYLE[data.status];
   const doneCount = data.episodeCount;
   const total = Math.max(1, data.selectedCount || data.k);
   const progressPct = Math.min(100, Math.round((doneCount / total) * 100));
+  const preview = data.subject ?? data.firstIdeaPreview ?? "—";
 
   return (
     <div
@@ -128,6 +139,22 @@ export function JobCard({ data }: CardProps): JSX.Element {
             <span>{sourceLabel(data.sourceKind)}</span>
           </div>
           <span className="tabular-nums">{relativeTime(data.createdAt)}</span>
+        </div>
+        <div className="flex flex-col gap-1">
+          <span className="font-mono text-[10px] uppercase tracking-wider text-neutral-500">
+            from
+          </span>
+          <span className="truncate font-mono text-xs text-neutral-200">
+            {data.senderLabel}
+          </span>
+        </div>
+        <div className="flex flex-col gap-1">
+          <span className="font-mono text-[10px] uppercase tracking-wider text-neutral-500">
+            {data.subject ? "subject" : "first idea"}
+          </span>
+          <p className="line-clamp-2 text-xs leading-snug text-neutral-300">
+            {truncate(preview, 140)}
+          </p>
         </div>
         <div className="flex items-center gap-3 text-xs">
           <div className="flex items-center gap-1 text-neutral-300">
@@ -165,22 +192,20 @@ export function JobCard({ data }: CardProps): JSX.Element {
       <div className="flex items-center justify-between border-t border-white/5 px-3 py-2">
         <Link
           href={`/flow/${data.runId}`}
-          className="text-xs font-mono text-neutral-400 hover:text-white"
+          className="font-mono text-xs text-neutral-400 hover:text-white"
         >
           open →
         </Link>
         {data.episodeCount > 0 ? (
           <Link
-            href="/feed.xml"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 text-[11px] font-mono text-emerald-200 hover:bg-emerald-500/20"
+            href={`/flow/${data.runId}`}
+            className="inline-flex items-center gap-1 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 font-mono text-[11px] text-emerald-200 hover:bg-emerald-500/20"
           >
             <Play className="size-3" />
             <span>listen</span>
           </Link>
         ) : (
-          <span className="text-[11px] font-mono text-neutral-600">—</span>
+          <span className="font-mono text-[11px] text-neutral-600">—</span>
         )}
       </div>
       <Handle type="source" position={Position.Right} className="opacity-0" />

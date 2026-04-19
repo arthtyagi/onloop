@@ -1,5 +1,6 @@
 "use client";
 
+import { Lock } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -24,16 +25,16 @@ export function SubmitForm(): React.ReactElement {
       toast.error("Add at least one idea (10+ chars per line)");
       return;
     }
+    if (!email || !email.includes("@")) {
+      toast.error("Enter a valid email so we can notify you");
+      return;
+    }
     setSubmitting(true);
     try {
       const res = await fetch("/api/runs", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ideas,
-          k,
-          email: email.length > 0 ? email : undefined,
-        }),
+        body: JSON.stringify({ ideas, k, email }),
       });
       if (!res.ok) {
         const data = (await res.json().catch(() => ({}))) as {
@@ -55,48 +56,56 @@ export function SubmitForm(): React.ReactElement {
   return (
     <form
       onSubmit={onSubmit}
-      className="mx-auto flex w-full max-w-2xl flex-col gap-4"
+      className="mx-auto flex w-full max-w-3xl flex-col gap-5"
     >
       <div className="flex flex-col gap-2">
         <label
           htmlFor="ideas"
           className="font-mono text-xs uppercase tracking-wider text-muted-foreground"
         >
-          Ideas (one per line)
+          Podcast ideas (one per line, min 10 chars)
         </label>
         <Textarea
           id="ideas"
           value={ideasText}
           onChange={(e) => setIdeasText(e.target.value)}
-          rows={8}
+          rows={10}
           placeholder={
-            "Why durable workflow runtimes are the next substrate\nThe Apple Podcasts search problem\nWhat the AI music licensing wars look like in 2030"
+            "Why durable workflow runtimes are the 2026 substrate for agents\nThe Apple Podcasts search problem and what it means for discovery\nWhat the AI music licensing wars look like in 2030"
           }
-          className="font-mono text-sm"
+          className="min-h-[240px] resize-y font-mono text-sm leading-relaxed"
         />
       </div>
-      <div className="flex items-end gap-3">
+      <div className="flex flex-col gap-3 md:flex-row md:items-end">
         <div className="flex flex-1 flex-col gap-2">
           <label
             htmlFor="email"
             className="font-mono text-xs uppercase tracking-wider text-muted-foreground"
           >
-            Email (optional)
+            Email (for the finished episode)
           </label>
           <Input
             id="email"
             type="email"
+            required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder="you@example.com"
+            placeholder="you@domain.com"
           />
+          <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
+            <Lock className="size-3" />
+            <span>
+              We only use this to send your ready-to-publish episode back. No
+              account. No list.
+            </span>
+          </p>
         </div>
         <div className="flex flex-col gap-2">
           <label
             htmlFor="k"
             className="font-mono text-xs uppercase tracking-wider text-muted-foreground"
           >
-            K
+            K (episodes)
           </label>
           <select
             id="k"
@@ -110,7 +119,7 @@ export function SubmitForm(): React.ReactElement {
           </select>
         </div>
         <Button type="submit" disabled={submitting} size="lg">
-          {submitting ? "Starting..." : "Generate"}
+          {submitting ? "Starting…" : "Generate"}
         </Button>
       </div>
     </form>

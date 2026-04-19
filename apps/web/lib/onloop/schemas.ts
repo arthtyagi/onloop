@@ -95,7 +95,9 @@ export const ParsedEmailSchema = z.object({
   sourceMessageId: z.string(),
   senderEmail: z.string(),
   senderHash: z.string().length(64),
+  senderLabel: z.string(),
   subject: z.string(),
+  subjectClean: z.string(),
   k: z.number().int().min(1).max(3),
   ideas: z.array(z.string().min(1)).min(1).max(10),
 });

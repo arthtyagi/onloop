@@ -102,6 +102,7 @@ export type RunSummary = Run & {
   ideaCount: number;
   selectedCount: number;
   episodeCount: number;
+  firstIdeaPreview: string | null;
 };
 
 export async function listRunSummaries(limit = 50): Promise<RunSummary[]> {
@@ -119,6 +120,7 @@ export async function listRunSummaries(limit = 50): Promise<RunSummary[]> {
     db.select().from(episodes).where(inArray(episodes.runId, runIds)),
   ]);
   const ideaByRun = new Map<string, { total: number; selected: number }>();
+  const firstIdeaByRun = new Map<string, { text: string; createdAt: Date }>();
   for (const id of runIds) {
     ideaByRun.set(id, { total: 0, selected: 0 });
   }
@@ -131,6 +133,13 @@ export async function listRunSummaries(limit = 50): Promise<RunSummary[]> {
     if (idea.selected) {
       acc.selected += 1;
     }
+    const current = firstIdeaByRun.get(idea.runId);
+    if (!current || idea.createdAt < current.createdAt) {
+      firstIdeaByRun.set(idea.runId, {
+        text: idea.text,
+        createdAt: idea.createdAt,
+      });
+    }
   }
   const episodeByRun = new Map<string, number>();
   for (const ep of episodeRows) {
@@ -141,6 +150,7 @@ export async function listRunSummaries(limit = 50): Promise<RunSummary[]> {
     ideaCount: ideaByRun.get(r.id)?.total ?? 0,
     selectedCount: ideaByRun.get(r.id)?.selected ?? 0,
     episodeCount: episodeByRun.get(r.id) ?? 0,
+    firstIdeaPreview: firstIdeaByRun.get(r.id)?.text ?? null,
   }));
 }
 

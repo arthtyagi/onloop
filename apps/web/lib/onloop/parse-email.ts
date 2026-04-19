@@ -7,6 +7,7 @@ import {
 } from "./config";
 import { sha256Hex } from "./hash";
 import { InboundWebhookPayloadSchema, type ParsedEmail } from "./schemas";
+import { maskEmail, stripKTag } from "./sender";
 
 export class EmailParseError extends Error {
   readonly code: "no_ideas" | "invalid_payload" | "no_body";
@@ -89,13 +90,17 @@ export async function parseInboundEmail(
 
   const senderHash = await sha256Hex(senderEmail.toLowerCase());
   const k = extractK(email.subject);
+  const senderLabel = maskEmail(senderEmail);
+  const subjectClean = stripKTag(email.subject);
 
   return {
     originalEmailId: email.id,
     sourceMessageId: email.messageId,
     senderEmail,
     senderHash,
+    senderLabel,
     subject: email.subject,
+    subjectClean,
     k,
     ideas,
   };

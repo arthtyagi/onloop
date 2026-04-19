@@ -15,6 +15,9 @@ export type CreateRunInput = {
   sourceMessageId: string;
   originalEmailId: string;
   senderEmail: string;
+  senderLabel: string;
+  subject: string | null;
+  notifyEmail: string | null;
 };
 
 export type CreateRunResult = {
@@ -46,6 +49,9 @@ export async function createOnloopRun(
     k: input.k,
     status: "queued",
     senderHash,
+    senderLabel: input.senderLabel,
+    subject: input.subject,
+    notifyEmail: input.notifyEmail,
     sourceMessageId: input.sourceMessageId,
     originalEmailId: input.originalEmailId,
   });
