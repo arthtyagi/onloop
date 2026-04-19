@@ -9,19 +9,14 @@ import {
 } from "@/lib/db/onloop-runs";
 import type { NewEpisode } from "@/lib/db/schema";
 import { estimateDurationSec } from "@/lib/onloop/concat";
-import { concatMp3 } from "@/lib/onloop/mp3";
-import {
-  EPISODE_MP3_PATH_PREFIX,
-  INTRO_SFX_PROMPT,
-  OUTRO_SFX_PROMPT,
-} from "@/lib/onloop/config";
+
+import { EPISODE_MP3_PATH_PREFIX } from "@/lib/onloop/config";
 import type { PipelineEvent, PipelineStep } from "@/lib/onloop/events";
 import { researchIdea } from "@/lib/onloop/research";
 import type { MoodTag } from "@/lib/onloop/schemas";
 import { generateScript } from "@/lib/onloop/script";
-import { sendReplyEmail } from "@/lib/onloop/reply";
 import { sendNotificationEmail } from "@/lib/onloop/notify";
-import { generateSfx } from "@/lib/onloop/sfx";
+import { sendReplyEmail } from "@/lib/onloop/reply";
 import { textToSpeech } from "@/lib/onloop/tts";
 import { triageIdeas } from "@/lib/onloop/triage";
 
@@ -117,39 +112,6 @@ async function scriptStep(
 async function voiceStep(text: string): Promise<Buffer> {
   "use step";
   return await textToSpeech(text);
-}
-
-async function introSfxStep(): Promise<Buffer> {
-  "use step";
-  return await generateSfx(INTRO_SFX_PROMPT);
-}
-
-async function outroSfxStep(): Promise<Buffer> {
-  "use step";
-  return await generateSfx(OUTRO_SFX_PROMPT);
-}
-
-async function concatStep(
-  intro: Buffer,
-  voice: Buffer,
-  outro: Buffer,
-): Promise<{ buffer: Buffer; durationSec: number }> {
-  "use step";
-  const introBuf = Buffer.from(intro);
-  const voiceBuf = Buffer.from(voice);
-  const outroBuf = Buffer.from(outro);
-  console.error(
-    `[concat] sizes intro=${introBuf.length} voice=${voiceBuf.length} outro=${outroBuf.length} ` +
-      `intro[0..3]=${introBuf.subarray(0, 3).toString("hex")} ` +
-      `voice[0..3]=${voiceBuf.subarray(0, 3).toString("hex")} ` +
-      `outro[0..3]=${outroBuf.subarray(0, 3).toString("hex")}`,
-  );
-  const buffer = concatMp3(introBuf, voiceBuf, outroBuf);
-  const durationSec = estimateDurationSec(buffer);
-  console.error(
-    `[concat] output size=${buffer.length} first 16=${buffer.subarray(0, 16).toString("hex")}`,
-  );
-  return { buffer, durationSec };
 }
 
 async function publishStep(input: {
@@ -253,24 +215,10 @@ async function processBranch(runId: string, pick: Pick): Promise<void> {
     await emitStep("script", "completed");
 
     await emitStep("voice", "running");
-    await emitStep("intro-sfx", "running");
-    await emitStep("outro-sfx", "running");
-    const [voice, intro, outro] = await Promise.all([
-      voiceStep(script.text),
-      introSfxStep(),
-      outroSfxStep(),
-    ]);
+    const voiceBuffer = Buffer.from(await voiceStep(script.text));
+    const episodeBuffer = voiceBuffer;
+    const durationSec = estimateDurationSec(voiceBuffer);
     await emitStep("voice", "completed");
-    await emitStep("intro-sfx", "completed");
-    await emitStep("outro-sfx", "completed");
-
-    await emitStep("concat", "running");
-    const { buffer: episodeBuffer, durationSec } = await concatStep(
-      intro,
-      voice,
-      outro,
-    );
-    await emitStep("concat", "completed");
 
     await emitStep("publish", "running");
     const published = await publishStep({

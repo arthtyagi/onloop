@@ -48,11 +48,7 @@ export function toMpegFrames(buf: Buffer): Buffer {
   return stripped.subarray(syncAt);
 }
 
-export function concatMp3(
-  intro: Buffer,
-  voice: Buffer,
-  outro: Buffer,
-): Buffer {
+export function concatMp3(intro: Buffer, voice: Buffer, outro: Buffer): Buffer {
   return Buffer.concat([intro, toMpegFrames(voice), toMpegFrames(outro)]);
 }
 

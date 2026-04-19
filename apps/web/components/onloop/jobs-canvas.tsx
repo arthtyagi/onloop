@@ -137,6 +137,8 @@ export function JobsCanvas({
   const [runs, setRuns] = useState<CanvasJob[]>(initial);
   const [positions, setPositions] = useState<PositionMap>({});
   const [loaded, setLoaded] = useState(initial.length > 0);
+  const [fetchError, setFetchError] = useState<string | null>(null);
+  const [reloadTick, setReloadTick] = useState(0);
 
   useEffect(() => {
     setPositions(loadPositions());
@@ -155,15 +157,24 @@ export function JobsCanvas({
           headers: { [SESSION_HEADER]: sessionId as string },
         });
         if (!res.ok) {
+          if (!cancelled) {
+            setFetchError(`${res.status} ${res.statusText}`);
+            setLoaded(true);
+          }
           return;
         }
         const data = (await res.json()) as ListResponse;
         if (!cancelled) {
           setRuns(data.runs);
+          setFetchError(null);
           setLoaded(true);
         }
       } catch (err) {
-        void err;
+        if (!cancelled) {
+          const message = err instanceof Error ? err.message : "network error";
+          setFetchError(message);
+          setLoaded(true);
+        }
       }
     }
 
@@ -173,7 +184,7 @@ export function JobsCanvas({
       cancelled = true;
       clearInterval(id);
     };
-  }, [sessionId, pollIntervalMs]);
+  }, [sessionId, pollIntervalMs, reloadTick]);
 
   const onNodesChange = useCallback((changes: NodeChange[]) => {
     let shouldPersist = false;
@@ -205,6 +216,28 @@ export function JobsCanvas({
           <p className="font-mono text-xs uppercase tracking-wider text-neutral-500">
             loading…
           </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (fetchError && runs.length === 0) {
+    return (
+      <div className="relative h-full w-full rounded-xl border border-red-500/20 bg-red-500/5">
+        <div className="flex h-full items-center justify-center">
+          <div className="flex max-w-md flex-col items-center gap-3 text-center">
+            <p className="font-mono text-xs uppercase tracking-wider text-red-300">
+              couldn&apos;t load jobs
+            </p>
+            <p className="text-sm text-neutral-400">{fetchError}</p>
+            <button
+              type="button"
+              onClick={() => setReloadTick((n) => n + 1)}
+              className="rounded-md border border-white/10 bg-white/5 px-3 py-1.5 font-mono text-xs text-white hover:bg-white/10"
+            >
+              retry
+            </button>
+          </div>
         </div>
       </div>
     );

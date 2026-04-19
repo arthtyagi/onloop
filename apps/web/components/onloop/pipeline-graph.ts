@@ -6,13 +6,11 @@ const COL_TRIAGE = 220;
 const COL_RESEARCH = 460;
 const COL_SCRIPT = 680;
 const COL_AUDIO = 900;
-const COL_CONCAT = 1120;
 const COL_PUBLISH = 1320;
 const COL_EPISODE = 1540;
 const COL_REPLY = 1780;
 
 const ROW_HEIGHT = 220;
-const AUDIO_OFFSET = 72;
 
 export type CanvasIdea = {
   id: string;
@@ -124,9 +122,6 @@ export function buildPipelineGraph(state: CanvasState): {
     const researchId = `${ideaIdSafe}-research`;
     const scriptId = `${ideaIdSafe}-script`;
     const voiceId = `${ideaIdSafe}-voice`;
-    const introId = `${ideaIdSafe}-intro-sfx`;
-    const outroId = `${ideaIdSafe}-outro-sfx`;
-    const concatId = `${ideaIdSafe}-concat`;
     const publishId = `${ideaIdSafe}-publish`;
     const episodeId = `${ideaIdSafe}-episode`;
 
@@ -151,31 +146,10 @@ export function buildPipelineGraph(state: CanvasState): {
       step(
         voiceId,
         COL_AUDIO,
-        y - AUDIO_OFFSET,
+        y,
         "Voice",
         stepStatus(state.stepStates, voiceId),
         "ElevenLabs TTS",
-      ),
-      step(
-        introId,
-        COL_AUDIO,
-        y,
-        "Intro SFX",
-        stepStatus(state.stepStates, introId),
-      ),
-      step(
-        outroId,
-        COL_AUDIO,
-        y + AUDIO_OFFSET,
-        "Outro SFX",
-        stepStatus(state.stepStates, outroId),
-      ),
-      step(
-        concatId,
-        COL_CONCAT,
-        y,
-        "Concat",
-        stepStatus(state.stepStates, concatId),
       ),
       step(
         publishId,
@@ -201,12 +175,7 @@ export function buildPipelineGraph(state: CanvasState): {
       edge(`e-triage-${researchId}`, "triage", researchId),
       edge(`e-${researchId}-${scriptId}`, researchId, scriptId),
       edge(`e-${scriptId}-${voiceId}`, scriptId, voiceId),
-      edge(`e-${scriptId}-${introId}`, scriptId, introId),
-      edge(`e-${scriptId}-${outroId}`, scriptId, outroId),
-      edge(`e-${voiceId}-${concatId}`, voiceId, concatId),
-      edge(`e-${introId}-${concatId}`, introId, concatId),
-      edge(`e-${outroId}-${concatId}`, outroId, concatId),
-      edge(`e-${concatId}-${publishId}`, concatId, publishId),
+      edge(`e-${voiceId}-${publishId}`, voiceId, publishId),
       edge(`e-${publishId}-${episodeId}`, publishId, episodeId),
       edge(`e-${episodeId}-reply`, episodeId, "reply"),
     );
