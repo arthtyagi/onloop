@@ -47,6 +47,9 @@ export async function triageIdeas(
       schema: TriageOutputSchema,
       system: SYSTEM_PROMPT,
       prompt: userPrompt,
+      providerOptions: {
+        anthropic: { thinking: { type: "disabled", budgetTokens: 0 } },
+      },
     });
     object = result.object;
   } catch (err) {
