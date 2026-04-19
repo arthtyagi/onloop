@@ -119,26 +119,49 @@ export function CanvasHeader({
         </div>
       </div>
       <div className="flex flex-col gap-3 md:flex-row md:items-stretch">
-        <div className="flex items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 py-2 md:w-[360px]">
-          <Mail className="size-4 text-neutral-400" />
-          <div className="flex flex-col">
-            <span className="font-mono text-[10px] uppercase tracking-widest text-neutral-500">
-              send ideas to
-            </span>
-            <span className="font-mono text-sm text-white">{inboundEmail}</span>
+        <div className="flex flex-col gap-2 rounded-lg border border-white/10 bg-white/5 px-3 py-2 md:w-[400px]">
+          <div className="flex items-center gap-2">
+            <Mail className="size-4 text-neutral-400" />
+            <div className="flex flex-1 flex-col">
+              <span className="font-mono text-[10px] uppercase tracking-widest text-neutral-500">
+                send ideas to
+              </span>
+              <span className="font-mono text-sm text-white">
+                {inboundEmail}
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={handleCopy}
+              aria-label="copy email"
+              className="rounded p-1.5 text-neutral-400 hover:bg-white/5 hover:text-white"
+            >
+              {copied ? (
+                <Check className="size-4 text-emerald-400" />
+              ) : (
+                <Copy className="size-4" />
+              )}
+            </button>
           </div>
-          <button
-            type="button"
-            onClick={handleCopy}
-            aria-label="copy email"
-            className="ml-auto rounded p-1.5 text-neutral-400 hover:bg-white/5 hover:text-white"
-          >
-            {copied ? (
-              <Check className="size-4 text-emerald-400" />
-            ) : (
-              <Copy className="size-4" />
-            )}
-          </button>
+          <div className="flex flex-col gap-1.5 border-t border-white/5 pt-2">
+            <p className="font-mono text-[10px] uppercase tracking-widest text-neutral-500">
+              email format
+            </p>
+            <div className="rounded border border-white/5 bg-black/30 px-2 py-1.5 font-mono text-[11px] leading-relaxed text-neutral-400">
+              <p>
+                <span className="text-neutral-500">subject:</span>{" "}
+                <span className="text-neutral-200">podcast ideas [K=2]</span>
+              </p>
+              <p className="mt-1">
+                <span className="text-neutral-500">body:</span>{" "}
+                <span className="text-neutral-300">one idea per line</span>
+              </p>
+            </div>
+            <p className="text-[10px] leading-snug text-neutral-600">
+              K=1–3 sets how many episodes to produce (default 1). Each line in
+              the body is one idea (min 10 chars, max 10 ideas).
+            </p>
+          </div>
         </div>
         <form
           onSubmit={handleSubmit}
