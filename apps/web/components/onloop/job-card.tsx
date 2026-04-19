@@ -1,6 +1,5 @@
 "use client";
 
-import { Handle, Position } from "@xyflow/react";
 import {
   CheckCircle2,
   Clock,
@@ -11,7 +10,6 @@ import {
   XCircle,
   Zap,
 } from "lucide-react";
-import Link from "next/link";
 import { useEffect, useState, type JSX } from "react";
 import { relativeTime } from "@/lib/onloop/relative-time";
 
@@ -34,8 +32,6 @@ export type JobCardData = {
   readonly selectedCount: number;
   readonly episodeCount: number;
 };
-
-type CardProps = { data: JobCardData };
 
 const STATUS_STYLE: Record<
   JobStatus,
@@ -105,7 +101,13 @@ function truncate(input: string, max: number): string {
   return `${input.slice(0, max - 1).trimEnd()}…`;
 }
 
-export function JobCard({ data }: CardProps): JSX.Element {
+export function JobCard({
+  data,
+  onClick,
+}: {
+  data: JobCardData;
+  onClick?: () => void;
+}): JSX.Element {
   useTick(30_000);
   const style = STATUS_STYLE[data.status];
   const doneCount = data.episodeCount;
@@ -114,11 +116,11 @@ export function JobCard({ data }: CardProps): JSX.Element {
   const preview = data.subject ?? data.firstIdeaPreview ?? "—";
 
   return (
-    <div
-      className={`relative flex w-[320px] flex-col rounded-lg border bg-neutral-950/80 shadow-xl backdrop-blur-sm transition-[box-shadow,transform] duration-200 hover:shadow-2xl ${style.borderClass}`}
-      data-status={data.status}
+    <button
+      type="button"
+      onClick={onClick}
+      className={`flex w-full cursor-pointer flex-col rounded-lg border bg-neutral-950/80 text-left shadow-xl backdrop-blur-sm transition-[box-shadow,border-color] duration-200 hover:shadow-2xl ${style.borderClass}`}
     >
-      <Handle type="target" position={Position.Left} className="opacity-0" />
       <div className="flex items-center justify-between gap-2 border-b border-white/5 px-3 py-2">
         <div className="flex items-center gap-2 font-mono text-xs">
           <span className={`size-1.5 rounded-full ${style.dotClass}`} />
@@ -142,14 +144,6 @@ export function JobCard({ data }: CardProps): JSX.Element {
             <span>{sourceLabel(data.sourceKind)}</span>
           </div>
           <span className="tabular-nums">{relativeTime(data.createdAt)}</span>
-        </div>
-        <div className="flex flex-col gap-1">
-          <span className="font-mono text-[10px] uppercase tracking-wider text-neutral-500">
-            from
-          </span>
-          <span className="truncate font-mono text-xs text-neutral-200">
-            {data.senderLabel}
-          </span>
         </div>
         <div className="flex flex-col gap-1">
           <span className="font-mono text-[10px] uppercase tracking-wider text-neutral-500">
@@ -203,37 +197,22 @@ export function JobCard({ data }: CardProps): JSX.Element {
             src={data.firstEpisodeMp3Url}
             controls
             preload="none"
-            className="nodrag w-full"
+            className="w-full"
+            onClick={(e) => e.stopPropagation()}
             onPointerDownCapture={(e) => e.stopPropagation()}
-            onMouseDownCapture={(e) => e.stopPropagation()}
           >
             <track kind="captions" />
           </audio>
         </div>
       ) : null}
-      <div className="flex items-center justify-between border-t border-white/5 px-3 py-2">
-        <Link
-          href={`/flow/${data.runId}`}
-          className="font-mono text-xs text-neutral-400 hover:text-white"
-          onPointerDownCapture={(e) => e.stopPropagation()}
-        >
-          open →
-        </Link>
-        {data.episodeCount > 0 && data.firstEpisodeMp3Url ? (
-          <a
-            href={data.firstEpisodeMp3Url}
-            download
-            onPointerDownCapture={(e) => e.stopPropagation()}
-            className="inline-flex items-center gap-1 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 font-mono text-[11px] text-emerald-200 hover:bg-emerald-500/20"
-          >
+      {data.episodeCount > 0 && data.firstEpisodeMp3Url ? (
+        <div className="flex items-center justify-end border-t border-white/5 px-3 py-2">
+          <span className="inline-flex items-center gap-1 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 font-mono text-[11px] text-emerald-200">
             <Play className="size-3" />
-            <span>download</span>
-          </a>
-        ) : (
-          <span className="font-mono text-[11px] text-neutral-600">—</span>
-        )}
-      </div>
-      <Handle type="source" position={Position.Right} className="opacity-0" />
-    </div>
+            <span>ready</span>
+          </span>
+        </div>
+      ) : null}
+    </button>
   );
 }
