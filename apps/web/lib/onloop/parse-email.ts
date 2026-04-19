@@ -97,6 +97,7 @@ export async function parseInboundEmail(
     throw new EmailParseError("no_body", "Email has no text or HTML body");
   }
 
+  const sessionId = extractSessionId(body);
   const ideas = extractIdeas(body);
   if (ideas.length === 0) {
     throw new EmailParseError(
@@ -120,5 +121,6 @@ export async function parseInboundEmail(
     subjectClean,
     k,
     ideas,
+    sessionId,
   };
 }
