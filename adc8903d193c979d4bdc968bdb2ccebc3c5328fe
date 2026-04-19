@@ -1,0 +1,14 @@
+.gitignore
+  h_c21c29def9da85 1-54
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.0",
+  "base_commit_sha": "adc8903d193c979d4bdc968bdb2ccebc3c5328fe",
+  "prompts": {},
+  "humans": {
+    "h_c21c29def9da85": {
+      "author": "Arth Tyagi"
+    }
+  }
+}
