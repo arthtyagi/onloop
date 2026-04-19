@@ -152,14 +152,23 @@ export function CanvasHeader({
                 <span className="text-neutral-500">subject:</span>{" "}
                 <span className="text-neutral-200">podcast ideas [K=2]</span>
               </p>
-              <p className="mt-1">
-                <span className="text-neutral-500">body:</span>{" "}
-                <span className="text-neutral-300">one idea per line</span>
+              <p className="mt-1.5">
+                <span className="text-neutral-500">body:</span>
               </p>
+              <p className="text-neutral-300">idea one per line</p>
+              <p className="text-neutral-300">another idea on a new line</p>
+              {sessionId ? (
+                <p className="mt-1 text-neutral-500">
+                  [session:{sessionId.slice(0, 8)}…]
+                </p>
+              ) : null}
             </div>
             <p className="text-[10px] leading-snug text-neutral-600">
-              K=1–3 sets how many episodes to produce (default 1). Each line in
-              the body is one idea (min 10 chars, max 10 ideas).
+              K=1–3 sets how many episodes to produce (default 1). Each line is
+              one idea (min 10 chars, max 10). Add{" "}
+              <span className="text-neutral-500">[session:ID]</span> anywhere in
+              the body to link the job to this browser — copy your ID from the
+              badge above.
             </p>
           </div>
         </div>
