@@ -42,9 +42,10 @@ describe("extractIdeas", () => {
   });
 
   test("caps at 10 ideas", () => {
-    const body = Array.from({ length: 15 }, (_, i) => `Idea number ${i} here`).join(
-      "\n",
-    );
+    const body = Array.from(
+      { length: 15 },
+      (_, i) => `Idea number ${i} here`,
+    ).join("\n");
     const ideas = extractIdeas(body);
     expect(ideas).toHaveLength(10);
   });
@@ -71,11 +72,13 @@ describe("extractIdeas", () => {
 });
 
 describe("parseInboundEmail", () => {
-  function payload(overrides: {
-    subject?: string;
-    textBody?: string | null;
-    htmlBody?: string | null;
-  } = {}) {
+  function payload(
+    overrides: {
+      subject?: string;
+      textBody?: string | null;
+      htmlBody?: string | null;
+    } = {},
+  ) {
     return {
       event: "email.received",
       timestamp: "2026-04-19T00:00:00Z",

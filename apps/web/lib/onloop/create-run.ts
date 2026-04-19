@@ -31,7 +31,14 @@ export async function createOnloopRun(
   }
 
   const senderHash = await sha256Hex(input.senderEmail.toLowerCase());
-  const runId = nanoid();
+
+  const wdkRun = await start(podcastWorkflow, [
+    {
+      originalEmailId: input.originalEmailId,
+      k: input.k,
+    },
+  ]);
+  const runId = wdkRun.runId;
 
   await createRun({
     id: runId,
@@ -50,14 +57,6 @@ export async function createOnloopRun(
     selected: false,
   }));
   await createIdeas(ideaRows);
-
-  await start(podcastWorkflow, [
-    {
-      runId,
-      originalEmailId: input.originalEmailId,
-      k: input.k,
-    },
-  ]);
 
   return { runId, deduped: false };
 }

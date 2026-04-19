@@ -12,9 +12,9 @@ describe("concatAudio", () => {
   });
 
   test("handles empty buffers", () => {
-    expect(concatAudio(Buffer.alloc(0), Buffer.alloc(0), Buffer.alloc(0))).toEqual(
-      Buffer.alloc(0),
-    );
+    expect(
+      concatAudio(Buffer.alloc(0), Buffer.alloc(0), Buffer.alloc(0)),
+    ).toEqual(Buffer.alloc(0));
   });
 });
 

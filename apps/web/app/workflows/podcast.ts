@@ -1,5 +1,5 @@
 import { nanoid } from "nanoid";
-import { getWritable } from "workflow";
+import { getWorkflowMetadata, getWritable, sleep } from "workflow";
 import {
   createEpisode,
   getIdeasForRun,
@@ -24,7 +24,6 @@ import { textToSpeech } from "@/lib/onloop/tts";
 import { triageIdeas } from "@/lib/onloop/triage";
 
 type WorkflowInput = {
-  runId: string;
   originalEmailId: string;
   k: number;
 };
@@ -265,16 +264,21 @@ async function processBranch(runId: string, pick: Pick): Promise<void> {
 export async function podcastWorkflow(input: WorkflowInput): Promise<void> {
   "use workflow";
 
+  const { workflowRunId } = getWorkflowMetadata();
+  const runId = workflowRunId;
+
+  await sleep("2s");
+
   try {
-    await updateRunStatusStep(input.runId, "running");
+    await updateRunStatusStep(runId, "running");
     await emitEvent({
       type: "run-status",
       status: "running",
       timestamp: now(),
     });
 
-    const ideaPairs = await fetchIdeasStep(input.runId);
-    const picks = await triageStep(input.runId, ideaPairs, input.k);
+    const ideaPairs = await fetchIdeasStep(runId);
+    const picks = await triageStep(runId, ideaPairs, input.k);
 
     await emitEvent({
       type: "triage-complete",
@@ -286,13 +290,13 @@ export async function podcastWorkflow(input: WorkflowInput): Promise<void> {
       timestamp: now(),
     });
 
-    await Promise.all(picks.map((pick) => processBranch(input.runId, pick)));
+    await Promise.all(picks.map((pick) => processBranch(runId, pick)));
 
     const fromAddress = process.env.ONLOOP_FROM_ADDRESS ?? "hello@onloop.work";
-    await replyStep(input.runId, input.originalEmailId, fromAddress);
+    await replyStep(runId, input.originalEmailId, fromAddress);
     await emitEvent({ type: "reply-sent", timestamp: now() });
 
-    await updateRunStatusStep(input.runId, "completed", new Date());
+    await updateRunStatusStep(runId, "completed", new Date());
     await emitEvent({
       type: "run-status",
       status: "completed",
@@ -305,7 +309,7 @@ export async function podcastWorkflow(input: WorkflowInput): Promise<void> {
       message,
       timestamp: now(),
     });
-    await updateRunStatusStep(input.runId, "failed");
+    await updateRunStatusStep(runId, "failed");
     await emitEvent({
       type: "run-status",
       status: "failed",
