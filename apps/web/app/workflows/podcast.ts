@@ -127,6 +127,21 @@ async function outroSfxStep(): Promise<Buffer> {
   return await generateSfx(OUTRO_SFX_PROMPT);
 }
 
+async function concatStep(
+  intro: Buffer,
+  voice: Buffer,
+  outro: Buffer,
+): Promise<{ buffer: Buffer; durationSec: number }> {
+  "use step";
+  const buffer = concatAudio(
+    Buffer.from(intro),
+    Buffer.from(voice),
+    Buffer.from(outro),
+  );
+  const durationSec = estimateDurationSec(buffer);
+  return { buffer, durationSec };
+}
+
 async function publishStep(input: {
   runId: string;
   ideaId: string;
@@ -226,8 +241,11 @@ async function processBranch(runId: string, pick: Pick): Promise<void> {
     await emitStep("outro-sfx", "completed");
 
     await emitStep("concat", "running");
-    const episodeBuffer = concatAudio(intro, voice, outro);
-    const durationSec = estimateDurationSec(episodeBuffer);
+    const { buffer: episodeBuffer, durationSec } = await concatStep(
+      intro,
+      voice,
+      outro,
+    );
     await emitStep("concat", "completed");
 
     await emitStep("publish", "running");
