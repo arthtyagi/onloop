@@ -252,6 +252,10 @@ async function processBranch(runId: string, pick: Pick): Promise<void> {
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
+    const stack = err instanceof Error ? err.stack : undefined;
+    console.error(
+      `[onloop branch ${pick.ideaId}] step failed: ${message}\n${stack ?? ""}`,
+    );
     await emitEvent({
       type: "run-error",
       message: `Branch ${pick.ideaId}: ${message}`,
@@ -304,6 +308,10 @@ export async function podcastWorkflow(input: WorkflowInput): Promise<void> {
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
+    const stack = err instanceof Error ? err.stack : undefined;
+    console.error(
+      `[onloop workflow ${runId}] failed: ${message}\n${stack ?? ""}`,
+    );
     await emitEvent({
       type: "run-error",
       message,
