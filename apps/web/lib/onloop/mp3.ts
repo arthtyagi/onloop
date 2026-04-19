@@ -55,26 +55,6 @@ export function concatMp3(
 ): Buffer {
   return Buffer.concat([intro, toMpegFrames(voice), toMpegFrames(outro)]);
 }
-  if (buf[0] !== 0x49 || buf[1] !== 0x44 || buf[2] !== 0x33) {
-    return buf;
-  }
-  const flags = buf[5] ?? 0;
-  const size =
-    ((buf[6] ?? 0) << 21) |
-    ((buf[7] ?? 0) << 14) |
-    ((buf[8] ?? 0) << 7) |
-    (buf[9] ?? 0);
-  const hasFooter = (flags & 0x10) !== 0;
-  const headerTotal = 10 + size + (hasFooter ? 10 : 0);
-  if (headerTotal >= buf.length) {
-    return buf;
-  }
-  return buf.subarray(headerTotal);
-}
-
-export function concatMp3(intro: Buffer, voice: Buffer, outro: Buffer): Buffer {
-  return Buffer.concat([intro, stripId3v2(voice), stripId3v2(outro)]);
-}
 
 export function countId3v2(buf: Buffer): number {
   let count = 0;
