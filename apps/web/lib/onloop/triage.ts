@@ -1,7 +1,8 @@
 import { gateway } from "@open-harness/agent";
 import { generateObject } from "ai";
 import { TRIAGE_MODEL } from "./config";
-import { TriageOutputSchema, type TriageOutput } from "./schemas";
+import type { MoodTag, ScoredIdea } from "./schemas";
+import { TriageOutputSchema } from "./schemas";
 
 const SYSTEM_PROMPT = `You are the triage agent for onloop, an AI-managed podcast pipeline. Score every idea on three axes (1-10 integers):
 - novelty: is this fresh or well-covered already?
@@ -12,17 +13,29 @@ Assign exactly one moodTag per idea: "news" for timely events, "explainer" for e
 
 Mark selected=true for exactly K ideas — the top K by (novelty + listenability + factuality). All others selected=false.
 
+Return one entry per input idea, preserving the input index (1-based).
+
 Rationale: one concise sentence per idea, grounded in the scores.`;
+
+export type TriageIdeaResult = {
+  id: string;
+  selected: boolean;
+  moodTag: MoodTag;
+  rationale: string;
+  scoreNovelty: number;
+  scoreListenability: number;
+  scoreFactuality: number;
+};
 
 export async function triageIdeas(
   ideas: { id: string; text: string }[],
   k: number,
-): Promise<TriageOutput> {
+): Promise<{ ideas: TriageIdeaResult[] }> {
   const userPrompt = [
     `K = ${k} (select exactly ${k} idea${k === 1 ? "" : "s"})`,
     "",
-    "IDEAS:",
-    ...ideas.map((idea) => `- [${idea.id}] ${idea.text}`),
+    "IDEAS (numbered, 1-based):",
+    ...ideas.map((idea, i) => `${i + 1}. ${idea.text}`),
   ].join("\n");
 
   const { object } = await generateObject({
@@ -32,23 +45,72 @@ export async function triageIdeas(
     prompt: userPrompt,
   });
 
-  const expectedIds = new Set(ideas.map((idea) => idea.id));
-  const returnedIds = new Set(object.ideas.map((idea) => idea.id));
-  if (expectedIds.size !== returnedIds.size) {
-    throw new Error(
-      `Triage returned ${returnedIds.size} ideas, expected ${expectedIds.size}`,
-    );
+  const seen = new Set<number>();
+  const byIndex: ScoredIdea[] = [];
+  for (const scored of object.ideas) {
+    if (scored.index < 1 || scored.index > ideas.length) {
+      continue;
+    }
+    if (seen.has(scored.index)) {
+      continue;
+    }
+    seen.add(scored.index);
+    byIndex[scored.index - 1] = scored;
   }
-  for (const id of expectedIds) {
-    if (!returnedIds.has(id)) {
-      throw new Error(`Triage missing idea id ${id}`);
+
+  const results: TriageIdeaResult[] = ideas.map((idea, i) => {
+    const scored = byIndex[i];
+    if (!scored) {
+      return {
+        id: idea.id,
+        selected: false,
+        moodTag: "commentary",
+        rationale: "Not scored by triage; defaulted to unselected.",
+        scoreNovelty: 1,
+        scoreListenability: 1,
+        scoreFactuality: 1,
+      };
+    }
+    return {
+      id: idea.id,
+      selected: scored.selected,
+      moodTag: scored.moodTag,
+      rationale: scored.rationale,
+      scoreNovelty: scored.scoreNovelty,
+      scoreListenability: scored.scoreListenability,
+      scoreFactuality: scored.scoreFactuality,
+    };
+  });
+
+  const selectedCount = results.filter((r) => r.selected).length;
+  if (selectedCount === 0) {
+    const sorted = [...results].sort(
+      (a, b) =>
+        b.scoreNovelty +
+        b.scoreListenability +
+        b.scoreFactuality -
+        (a.scoreNovelty + a.scoreListenability + a.scoreFactuality),
+    );
+    const toPick = Math.min(k, results.length);
+    const pickIds = new Set(sorted.slice(0, toPick).map((r) => r.id));
+    for (const r of results) {
+      r.selected = pickIds.has(r.id);
+    }
+  } else if (selectedCount > k) {
+    const sorted = results
+      .filter((r) => r.selected)
+      .sort(
+        (a, b) =>
+          b.scoreNovelty +
+          b.scoreListenability +
+          b.scoreFactuality -
+          (a.scoreNovelty + a.scoreListenability + a.scoreFactuality),
+      );
+    const keep = new Set(sorted.slice(0, k).map((r) => r.id));
+    for (const r of results) {
+      r.selected = keep.has(r.id);
     }
   }
 
-  const selectedCount = object.ideas.filter((idea) => idea.selected).length;
-  if (selectedCount !== k) {
-    throw new Error(`Triage selected ${selectedCount} ideas, expected ${k}`);
-  }
-
-  return object;
+  return { ideas: results };
 }

@@ -51,7 +51,7 @@ export const MoodTagSchema = z.enum(["news", "explainer", "commentary"]);
 export type MoodTag = z.infer<typeof MoodTagSchema>;
 
 const scoredIdeaSchema = z.object({
-  id: z.string(),
+  index: z.number().int().min(1),
   selected: z.boolean(),
   moodTag: MoodTagSchema,
   rationale: z.string().min(1).max(400),
