@@ -8,7 +8,8 @@ import {
   updateRunStatus,
 } from "@/lib/db/onloop-runs";
 import type { NewEpisode } from "@/lib/db/schema";
-import { concatAudio, estimateDurationSec } from "@/lib/onloop/concat";
+import { estimateDurationSec } from "@/lib/onloop/concat";
+import { concatMp3 } from "@/lib/onloop/mp3";
 import {
   EPISODE_MP3_PATH_PREFIX,
   INTRO_SFX_PROMPT,
@@ -134,7 +135,7 @@ async function concatStep(
   outro: Buffer,
 ): Promise<{ buffer: Buffer; durationSec: number }> {
   "use step";
-  const buffer = concatAudio(
+  const buffer = concatMp3(
     Buffer.from(intro),
     Buffer.from(voice),
     Buffer.from(outro),

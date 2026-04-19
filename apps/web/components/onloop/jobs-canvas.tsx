@@ -198,12 +198,12 @@ export function JobsCanvas({
     return { nodes: buildNodes(runs, positions), edges: [] as Edge[] };
   }, [runs, positions]);
 
-  if (!loaded) {
+  if (!sessionId || !loaded) {
     return (
       <div className="relative h-full w-full rounded-xl border border-white/5 bg-black/30">
         <div className="flex h-full items-center justify-center">
           <p className="font-mono text-xs uppercase tracking-wider text-neutral-500">
-            loading your jobs…
+            loading…
           </p>
         </div>
       </div>
@@ -214,7 +214,7 @@ export function JobsCanvas({
     return (
       <div className="relative h-full w-full rounded-xl border border-white/5 bg-black/30">
         <div className="flex h-full items-center justify-center">
-          <div className="flex flex-col items-center gap-3 text-center">
+          <div className="flex max-w-md flex-col items-center gap-3 text-center">
             <div className="rounded-full border border-white/10 bg-white/5 p-4">
               <svg
                 role="img"
@@ -234,11 +234,18 @@ export function JobsCanvas({
               </svg>
             </div>
             <p className="font-mono text-xs uppercase tracking-wider text-neutral-500">
-              No jobs in this session yet
+              You haven&apos;t submitted anything yet
             </p>
-            <p className="max-w-xs text-sm text-neutral-500">
-              Your jobs live only on this browser. Drop ideas above or email
-              them — cards appear here as they run.
+            <p className="text-sm text-neutral-500">
+              Jobs appear here scoped to this browser (no account). Drop ideas
+              in the form above, or email{" "}
+              <span className="font-mono text-neutral-300">
+                tasks@onloop.work
+              </span>
+              .
+            </p>
+            <p className="font-mono text-[10px] uppercase tracking-widest text-neutral-600">
+              session · {sessionId.slice(0, 8)}…
             </p>
           </div>
         </div>

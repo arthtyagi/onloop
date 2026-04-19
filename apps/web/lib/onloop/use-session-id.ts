@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { isValidSessionId, SESSION_STORAGE_KEY } from "./session";
 
 function generateId(): string {
@@ -10,27 +10,25 @@ function generateId(): string {
   return Math.random().toString(36).slice(2) + Date.now().toString(36);
 }
 
+function readOrCreate(): string | null {
+  if (typeof window === "undefined") {
+    return null;
+  }
+  try {
+    const stored = window.localStorage.getItem(SESSION_STORAGE_KEY);
+    if (isValidSessionId(stored)) {
+      return stored;
+    }
+    const fresh = generateId();
+    window.localStorage.setItem(SESSION_STORAGE_KEY, fresh);
+    return fresh;
+  } catch (err) {
+    void err;
+    return generateId();
+  }
+}
+
 export function useSessionId(): string | null {
-  const [sessionId, setSessionId] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (typeof window === "undefined") {
-      return;
-    }
-    try {
-      const stored = window.localStorage.getItem(SESSION_STORAGE_KEY);
-      if (isValidSessionId(stored)) {
-        setSessionId(stored);
-        return;
-      }
-      const fresh = generateId();
-      window.localStorage.setItem(SESSION_STORAGE_KEY, fresh);
-      setSessionId(fresh);
-    } catch (err) {
-      void err;
-      setSessionId(generateId());
-    }
-  }, []);
-
+  const [sessionId] = useState<string | null>(readOrCreate);
   return sessionId;
 }
