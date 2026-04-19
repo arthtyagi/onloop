@@ -119,8 +119,7 @@ async function publishStep(input: {
   ideaId: string;
   title: string;
   description: string;
-  episodeBuffer: Buffer;
-  durationSec: number;
+  voiceBytes: Uint8Array;
 }): Promise<{
   episodeId: string;
   title: string;
@@ -128,10 +127,12 @@ async function publishStep(input: {
   durationSec: number;
 }> {
   "use step";
+  const episodeBuffer = Buffer.from(input.voiceBytes);
+  const durationSec = estimateDurationSec(episodeBuffer);
   const { put } = await import("@vercel/blob");
   const guid = nanoid();
   const path = `${EPISODE_MP3_PATH_PREFIX}/${input.runId}/${guid}.mp3`;
-  const blob = await put(path, input.episodeBuffer, {
+  const blob = await put(path, episodeBuffer, {
     access: "public",
     contentType: "audio/mpeg",
     addRandomSuffix: false,
@@ -143,8 +144,8 @@ async function publishStep(input: {
     title: input.title,
     description: input.description,
     mp3Url: blob.url,
-    lengthBytes: input.episodeBuffer.length,
-    durationSec: input.durationSec,
+    lengthBytes: episodeBuffer.length,
+    durationSec,
     guid,
   };
   const saved = await createEpisode(episodeRow);
@@ -215,9 +216,7 @@ async function processBranch(runId: string, pick: Pick): Promise<void> {
     await emitStep("script", "completed");
 
     await emitStep("voice", "running");
-    const voiceBuffer = Buffer.from(await voiceStep(script.text));
-    const episodeBuffer = voiceBuffer;
-    const durationSec = estimateDurationSec(voiceBuffer);
+    const voiceBytes = await voiceStep(script.text);
     await emitStep("voice", "completed");
 
     await emitStep("publish", "running");
@@ -226,8 +225,7 @@ async function processBranch(runId: string, pick: Pick): Promise<void> {
       ideaId: pick.ideaId,
       title: script.title,
       description: script.description,
-      episodeBuffer,
-      durationSec,
+      voiceBytes,
     });
     await emitStep("publish", "completed");
 
