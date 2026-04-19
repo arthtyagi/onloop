@@ -1,6 +1,6 @@
 import { ImageResponse } from "next/og";
 
-export const alt = "Open Agents — Spawn coding agents that run in the cloud";
+export const alt = "onloop — email in, podcast out";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 export const runtime = "edge";
@@ -20,7 +20,6 @@ export default function OgImage() {
           'ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
       }}
     >
-      {/* Subtle radial glow — top-left warm, bottom-right cool */}
       <div
         style={{
           position: "absolute",
@@ -31,7 +30,6 @@ export default function OgImage() {
         }}
       />
 
-      {/* Noise-ish grain approximation with faint horizontal lines */}
       <div
         style={{
           position: "absolute",
@@ -43,7 +41,6 @@ export default function OgImage() {
         }}
       />
 
-      {/* Border frame */}
       <div
         style={{
           position: "absolute",
@@ -57,7 +54,6 @@ export default function OgImage() {
         }}
       />
 
-      {/* Content */}
       <div
         style={{
           position: "absolute",
@@ -71,7 +67,6 @@ export default function OgImage() {
           padding: "52px 56px",
         }}
       >
-        {/* Top section */}
         <div
           style={{
             display: "flex",
@@ -79,7 +74,6 @@ export default function OgImage() {
             gap: 0,
           }}
         >
-          {/* Logo / icon + wordmark row */}
           <div
             style={{
               display: "flex",
@@ -90,17 +84,18 @@ export default function OgImage() {
           >
             <svg viewBox="0 0 24 24" width="28" height="28" fill="none">
               <path
-                d="M4 17L10 11L4 5"
+                d="M4 12a8 8 0 0 1 16 0v5a3 3 0 0 1-3 3h-1v-8h4"
                 stroke="rgba(255,255,255,0.5)"
                 stroke-width="1.5"
                 stroke-linecap="round"
                 stroke-linejoin="round"
               />
               <path
-                d="M12 19H20"
+                d="M4 12v5a3 3 0 0 0 3 3h1v-8H4"
                 stroke="rgba(255,255,255,0.5)"
                 stroke-width="1.5"
                 stroke-linecap="round"
+                stroke-linejoin="round"
               />
             </svg>
             <span
@@ -109,40 +104,40 @@ export default function OgImage() {
                 fontWeight: 600,
                 letterSpacing: "-0.01em",
                 color: "rgba(255, 255, 255, 0.5)",
+                fontFamily:
+                  "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
               }}
             >
-              Open Agents
+              onloop
             </span>
           </div>
 
-          {/* Hero heading */}
           <div
             style={{
-              fontSize: 82,
+              fontSize: 88,
               fontWeight: 600,
               lineHeight: 1,
               letterSpacing: "-0.04em",
               color: "#ffffff",
             }}
           >
-            Open Agents.
+            Email in. Podcast out.
           </div>
 
-          {/* Subtitle */}
           <div
             style={{
               marginTop: 24,
-              fontSize: 28,
+              fontSize: 26,
               lineHeight: 1.45,
               color: "rgba(255, 255, 255, 0.45)",
-              maxWidth: 720,
+              maxWidth: 820,
             }}
           >
-            Spawn coding agents that run infinitely in the cloud.
+            An AI-managed multimedia pipeline. Ready-to-publish podcast episodes
+            from email.
           </div>
         </div>
 
-        {/* Bottom row — tech pills */}
         <div
           style={{
             display: "flex",
@@ -150,12 +145,11 @@ export default function OgImage() {
             gap: 12,
           }}
         >
-          <TechPill label="AI SDK" />
-          <TechPill label="Gateway" />
-          <TechPill label="Sandbox" />
-          <TechPill label="Workflow SDK" />
+          <TechPill label="Email in" />
+          <TechPill label="ElevenLabs" />
+          <TechPill label="RSS out" />
+          <TechPill label="Ready to post" />
 
-          {/* Spacer + domain */}
           <div
             style={{
               display: "flex",
@@ -170,7 +164,7 @@ export default function OgImage() {
                 letterSpacing: "0.01em",
               }}
             >
-              open-agents.dev
+              onloop.work
             </span>
           </div>
         </div>
