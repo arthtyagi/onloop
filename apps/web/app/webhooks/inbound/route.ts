@@ -52,7 +52,7 @@ export async function POST(request: Request): Promise<Response> {
     senderLabel: parsed.senderLabel,
     subject: parsed.subjectClean.length > 0 ? parsed.subjectClean : null,
     notifyEmail: null,
-    sessionId: null,
+    sessionId: parsed.sessionId,
   });
 
   return NextResponse.json(
