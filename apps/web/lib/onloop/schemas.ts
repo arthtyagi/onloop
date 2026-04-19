@@ -69,7 +69,7 @@ export type ScoredIdea = z.infer<typeof scoredIdeaSchema>;
 
 export const ResearchBulletSchema = z.object({
   text: z.string().min(1),
-  sourceUrl: z.string().url(),
+  sourceUrl: z.string(),
   sourceTitle: z.string().min(1),
 });
 
