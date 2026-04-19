@@ -1,0 +1,55 @@
+apps/web/app/workflows/podcast.ts
+  204db013d741f2b1 311-314
+  367f0b12fa4703df 255-258
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.0",
+  "base_commit_sha": "7887ab9f66cdcc25eb6cfe9e49fd3ddecdfbb4bc",
+  "prompts": {
+    "204db013d741f2b1": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "opencode-transcript-ses_25bb93693ffexadLPq0XIXXz8T-36f14c5a-61ab-42a7-8e49-618cff647a2b",
+        "model": "unknown"
+      },
+      "human_author": "Arth Tyagi",
+      "messages": [],
+      "total_additions": 4,
+      "total_deletions": 0,
+      "accepted_lines": 4,
+      "overriden_lines": 0
+    },
+    "367f0b12fa4703df": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "opencode-transcript-ses_25bb93693ffexadLPq0XIXXz8T-8838b2a0-42f5-4fe6-acb6-5089873738a8",
+        "model": "unknown"
+      },
+      "human_author": "Arth Tyagi",
+      "messages": [],
+      "total_additions": 4,
+      "total_deletions": 0,
+      "accepted_lines": 4,
+      "overriden_lines": 0
+    },
+    "9bc21f698a58688a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e81bbfba-9039-4eac-8b95-3138cd0b7f3d",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "Arth Tyagi",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 84,
+      "overriden_lines": 0
+    }
+  },
+  "humans": {
+    "h_c21c29def9da85": {
+      "author": "Arth Tyagi"
+    }
+  }
+}
